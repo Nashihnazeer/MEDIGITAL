@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-
+import { ChevronDown } from "lucide-react";
 
 const HorizontalScrollWebsite = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -273,27 +273,30 @@ const HorizontalScrollWebsite = () => {
 
       {/* Centered Hero Content */}
       <div className="flex flex-col items-center justify-center text-center px-6">
-        <Image
-          src="/images/Smiley.png"
-          alt="Smiley"
-          width={viewportWidth ? viewportWidth * 0.4 : 150}
-          height={viewportWidth ? viewportWidth * 0.4 : 150}
-          style={{ maxWidth: "100%", height: "auto" }}
-        />
-        <div
-          className="text-4xl font-extrabold text-white leading-snug mt-4"
-          style={{
-            textShadow: `
-              -2px 0 0 #D59A3F,
-              2px 0 0 #AF2648
-            `,
-          }}
-        >
-          <span>
-            Digital is <br /> what&apos;s <br /> happening.
-          </span>
-        </div>
-      </div>
+  <Image
+    src="/images/Smiley.png"
+    alt="Smiley"
+    width={viewportWidth ? viewportWidth * 0.4 : 150}
+    height={viewportWidth ? viewportWidth * 0.4 : 150}
+    style={{ maxWidth: "100%", height: "auto" }}
+  />
+  <div
+    className="text-4xl font-extrabold text-white leading-snug mt-4"
+    style={{
+      textShadow: `
+        -2px 0 0 #D59A3F,
+        2px 0 0 #AF2648
+      `,
+    }}
+  >
+    <span>
+      Digital is <br /> what&apos;s <br /> happening.
+    </span>
+  </div>
+
+  {/* Downward Arrow */}
+  <ChevronDown className="w-10 h-10 mt-10 text-white animate-bounce" />
+</div>
     </section>
         {/* Mobile Section 2 - Ideas */}
         <section className="min-h-screen flex flex-col bg-white p-6">
@@ -478,7 +481,7 @@ const HorizontalScrollWebsite = () => {
                 We Advertise. We Amaze.
               </h3>
               <p className="text-white text-xs leading-relaxed">
-                <span className="text-orange-500">&quot;dont tell, show&quot;</span> is our mantra. Our work speaks—bold,
+                <span className="text-orange-500">&quot;dont tell, show&quot;</span> is git add .our mantra. Our work speaks—bold,
                 impactful, unforgettable.
               </p>
             </div>

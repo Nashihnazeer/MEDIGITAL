@@ -213,308 +213,335 @@ const HorizontalScrollWebsite = () => {
   if (isMobile) {
     return (
       <div className="min-h-screen bg-white">
-           <section
-      className="w-screen h-screen relative flex flex-col justify-center bg-black text-white md:hidden"
-      style={{
-        backgroundImage: "url('/images/Bg_1.png')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-      }}
+{/* Section 1 - Hero */}
+<section
+  className="w-screen h-screen relative flex flex-col justify-center bg-[#EEAA45] text-white md:hidden rounded-b-[3rem] overflow-hidden "
+  style={{
+    backgroundImage: "url('/images/Bg_1.png')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+  }}
+>
+  {/* Top Bar - Logo + Hamburger */}
+  <div className="flex items-center justify-between px-6 pt-6 absolute top-0 left-0 right-0 z-50">
+    <Image
+      src="/images/Logo.png"
+      alt="Logo"
+      width={100}
+      height={40}
+      className="cursor-pointer"
+    />
+    <button
+      onClick={() => setMenuOpen(!menuOpen)}
+      className="flex flex-col justify-between w-6 h-5 focus:outline-none"
+      aria-label={menuOpen ? "Close menu" : "Open menu"}
     >
-      {/* Top Bar - Logo + Hamburger */}
-      <div className="flex items-center justify-between px-6 pt-6 absolute top-0 left-0 right-0 z-50">
-        <Image
-          src="/images/Logo.png"
-          alt="Logo"
-          width={100}
-          height={40}
-          className="cursor-pointer"
-        />
-        {/* Hamburger */}
-        <button
-  onClick={() => setMenuOpen(!menuOpen)}
-  className="flex flex-col justify-between w-6 h-5 focus:outline-none"
-  aria-label={menuOpen ? "Close menu" : "Open menu"}
->
-  <span className="block h-0.5 bg-white rounded"></span>
-  <span className="block h-0.5 bg-white rounded"></span>
-  <span className="block h-0.5 bg-white rounded"></span>
-</button>
-
-      </div>
-
-      {/* Mobile Menu Overlay */}
-     <div
-  ref={menuRef}
-  className={`fixed top-16 right-0 w-48 bg-white text-black rounded-md shadow-lg transform transition-transform duration-300 z-50 md:hidden
-    ${menuOpen ? "translate-x-0 pointer-events-auto" : "translate-x-full pointer-events-none"}
-  `}
->
-  <ul className="flex flex-col space-y-4 p-4">
-    {["ABOUT US", "SERVICES", "PORTFOLIO", "BLOG"].map((item, idx) => (
-      <li key={idx} className="text-base font-medium cursor-pointer">
-        {item}
-      </li>
-    ))}
-
-    {/* Reach Us with link to section id */}
-    <li className="text-base font-medium cursor-pointer">
-      <a href="#reachouttous">REACH US</a>
-    </li>
-
-    {/* Orange items */}
-    <li className="mt-2 text-orange-500 font-medium">Creative</li>
-    <li className="text-orange-500 font-medium">Web</li>
-    <li className="text-orange-500 font-medium">Performance</li>
-    <li className="text-orange-500 font-medium">Content</li>
-  </ul>
-</div>
-
-      {/* Centered Hero Content */}
-      <div className="flex flex-col items-center justify-center text-center px-6">
-  <Image
-    src="/images/Smiley.png"
-    alt="Smiley"
-    width={viewportWidth ? viewportWidth * 0.4 : 150}
-    height={viewportWidth ? viewportWidth * 0.4 : 150}
-    style={{ maxWidth: "100%", height: "auto" }}
-  />
-  <div
-    className="text-4xl font-extrabold text-white leading-snug mt-4"
-    style={{
-      textShadow: `
-        -2px 0 0 #D59A3F,
-        2px 0 0 #AF2648
-      `,
-    }}
-  >
-    <span>
-      Digital is <br /> what&apos;s <br /> happening.
-    </span>
+      <span className="block h-0.5 bg-white rounded"></span>
+      <span className="block h-0.5 bg-white rounded"></span>
+      <span className="block h-0.5 bg-white rounded"></span>
+    </button>
   </div>
 
-  {/* Downward Arrow */}
-  <ChevronDown className="w-10 h-10 mt-10 text-white animate-bounce" />
-</div>
-    </section>
-        {/* Mobile Section 2 - Ideas */}
-        <section className="min-h-screen flex flex-col bg-white p-6">
-          <div className="flex-1 flex flex-col justify-center text-center">
-            <h2 className="text-4xl font-extrabold text-orange-500 leading-tight mb-6">
-              Ideas That<br />Break<br />Through.
-            </h2>
-            <p className="text-sm text-gray-600 mb-6 leading-relaxed">
-              We dont play it safe—we push ideas further. A team that tries,
-              learns, and reinvents until your brand{" "}
-              <span className="text-orange-500">speaks louder than the crowd.</span>
-            </p>
-            <button className="mx-auto w-48 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 mb-6">
-              Read more
-            </button>
-          </div>
+  {/* Mobile Menu Overlay */}
+  <div
+    ref={menuRef}
+    className={`fixed top-16 right-0 w-48 bg-white text-black rounded-md shadow-lg transform transition-transform duration-300 z-50 md:hidden 
+      ${menuOpen ? "translate-x-0 pointer-events-auto" : "translate-x-full pointer-events-none"}
+    `}
+  >
+    <ul className="flex flex-col space-y-4 p-4">
+      {["ABOUT US", "SERVICES", "PORTFOLIO", "BLOG"].map((item, idx) => (
+        <li key={idx} className="text-base font-medium cursor-pointer">
+          {item}
+        </li>
+      ))}
 
-          <div className="flex-1 relative min-h-64">
-            <Image
-              src="/images/ofcework.png"
-              alt="Office Work"
-              fill
-              style={{ objectFit: "contain" }}
-              priority
-            />
-          </div>
-        </section>
+      <li className="text-base font-medium cursor-pointer">
+        <a href="#reachouttous">REACH US</a>
+      </li>
 
-        {/* Mobile Section 3 - Services */}
-        <section className="min-h-screen bg-gray-200 p-6 flex flex-col justify-center">
-          <div className="text-center mb-8">
-            <h2 className="text-4xl font-extrabold text-black mb-4">
-              Need a digital<br />marketing<br />partner?
-            </h2>
-            <p className="text-gray-600 text-sm leading-relaxed">
-              Marketing doesn&apos;t have to be complicated. With us, it&apos;s<br />
-              smart, simple, and effective. Let&apos;s get started.
-            </p>
-          </div>
+      <li className="mt-2 text-orange-500 font-medium">Creative</li>
+      <li className="text-orange-500 font-medium">Web</li>
+      <li className="text-orange-500 font-medium">Performance</li>
+      <li className="text-orange-500 font-medium">Content</li>
+    </ul>
+  </div>
 
-          <div className="flex justify-center">
-            <ul className="space-y-4 text-sm text-gray-800">
-              <li>• Social Media Marketing</li>
-              <li>• Google Ads</li>
-              <li>• Search Engine Optimisation</li>
-              <li>• Organic Promotions</li>
-              <li>• Influencer Marketing</li>
-              <li>• Email Marketing</li>
-              <li>• App Promotions</li>
-              <li>• Content Marketing</li>
-            </ul>
-          </div>
-        </section>
+  {/* Centered Hero Content */}
+  <div className="flex flex-col items-center justify-center text-center px-6">
+    <Image
+      src="/images/Smiley.png"
+      alt="Smiley"
+      width={viewportWidth ? viewportWidth * 0.4 : 150}
+      height={viewportWidth ? viewportWidth * 0.4 : 150}
+      style={{ maxWidth: "100%", height: "auto" }}
+    />
+    <div
+      className="text-4xl font-extrabold text-white leading-snug mt-4"
+      style={{
+        textShadow: `
+          -2px 0 0 #D59A3F,
+          2px 0 0 #AF2648
+        `,
+      }}
+    >
+      <span>
+        Digital is <br /> what&apos;s <br /> happening.
+      </span>
+    </div>
 
-        {/* Mobile Section 4 - Our Way */}
-        <section
-          className="min-h-screen bg-black text-white p-6 flex flex-col justify-center"
-          style={{
-            backgroundImage: "url('/images/digital-marketing.png')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-          }}
+    {/* Downward Arrow */}
+    <ChevronDown className="w-10 h-10 mt-10 text-white animate-bounce" />
+  </div>
+</section>
+
+{/* Orange glow below the curved section */}
+<div className="w-screen h-6 rounded-b-[3rem] mx-auto bg-[#EEAA45]"></div>
+{/* Section 2 - Ideas */}
+<section
+  className="min-h-screen flex flex-col p-6 bg-cover bg-center bg-no-repeat"
+  style={{
+    backgroundImage: "url('/images/ofcework.png')",
+  }}
+>
+  <div className="flex-1 flex flex-col justify-end items-start text-left pb-12">
+    <h2 className="text-4xl font-extrabold text-orange-500 leading-tight mb-6">
+      Ideas That<br />Break<br />Through.
+    </h2>
+    <p className="text-sm text-gray-100 mb-6 leading-relaxed max-w-md">
+      We dont play it safe—we push ideas further. A team that tries,
+      learns, and reinvents until your brand{" "}
+      <span className="text-orange-500">speaks louder than the crowd.</span>
+    </p>
+    <button className="w-48 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
+      Read more
+    </button>
+  </div>
+</section>
+
+
+       {/* Mobile Section 3 - Services */}
+<section className="min-h-screen flex flex-col">
+  {/* Top Half */}
+  <div className="flex-1 bg-[#EEAA45] p-10 flex flex-col justify-center text-center">
+    <h2 className="text-4xl font-extrabold text-black mb-4">
+      Need a digital<br />marketing partner?
+    </h2>
+    <p className="text-black text-sm leading-relaxed">
+      Marketing doesn&apos;t have to be complicated.<br />With us, it&apos;s
+      smart, simple, and effective. Let&apos;s<br /> get started.
+    </p>
+  </div>
+
+  {/* Bottom Half */}
+  <div className="flex-1 bg-[#C4C6C8] p-6 flex flex-col justify-center items-center">
+    <ul className="space-y-4 text-xl text-black text-left w-fit leading-10">
+      <li>• Social Media Marketing</li>
+      <li>• Google Ads</li>
+      <li>• Search Engine Optimisation</li>
+      <li>• Organic Promotions</li>
+      <li>• Influencer Marketing</li>
+      <li>• Email Marketing</li>
+      <li>• App Promotions</li>
+      <li>• Content Marketing</li>
+    </ul>
+  </div>
+</section>
+
+{/* Mobile Section 4 - Our Way */}
+<section
+  className="min-h-screen text-white p-6 flex flex-col justify-center rounded-b-[3rem] overflow-hidden md:hidden relative z-10"
+  style={{
+    backgroundImage: "url('/images/digital-marketing.png')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+  }}
+>
+  {/* Content */}
+  <div className="relative z-10">
+    <div className="text-center mb-8">
+      <h2 className="text-6xl font-extrabold text-orange-500 mb-6">
+        Our<br />Way
+      </h2>
+    </div>
+
+    <div className="space-y-8">
+      <div className="text-center">
+        <h3 className="text-2xl font-extrabold text-orange-500 mb-2">Listen</h3>
+        <p className="text-white text-sm leading-relaxed">
+          Every great idea begins with listening. We tune in closely to
+          understand who our clients are, what they value, and what they
+          truly need.
+        </p>
+      </div>
+
+      <div className="text-center">
+        <h3 className="text-2xl font-extrabold text-orange-500 mb-2">Reflect</h3>
+        <p className="text-white text-sm leading-relaxed">
+          Clear, thoughtful thinking is where creativity sparks. The
+          sharper the thought, the stronger the idea.
+        </p>
+      </div>
+
+      <div className="text-center">
+        <h3 className="text-2xl font-extrabold text-orange-500 mb-2">Create</h3>
+        <p className="text-white text-sm leading-relaxed">
+          Ideas alone are just words. When brought to life with purpose and
+          precision, they evolve into impact — and sometimes, into legacies.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{/* Mobile Section 5 - Design Process */}
+<section
+  className="min-h-[200vh] p-6 pt-20 flex flex-col justify-start relative bg-cover bg-center bg-no-repeat -mt-16"
+  style={{
+    backgroundImage: "url('/images/laptop-table.png')",
+  }}
+>
+  {/* Optional dark overlay */}
+  <div className="absolute inset-0 bg-black/40"></div>
+
+  {/* Content wrapper with extra top spacing */}
+  <div className="relative z-10 pt-[100px]">
+    {/* Section Heading */}
+    <div className="text-center mb-16">
+      <h2 className="text-3xl font-extrabold text-orange-500 mb-4">
+        Our Design Process
+      </h2>
+      <p className="text-gray-200 text-base leading-relaxed">
+        Reboot Your Brand in{" "}
+        <span className="text-orange-500">5 Daring Steps.</span>
+      </p>
+    </div>
+
+    {/* Cards Stack */}
+    <div className="relative flex flex-col items-center">
+      {/* Card 1 */}
+      <div className="bg-orange-500 text-white p-8 pt-[80px] h-80 w-[350px] rounded-2xl relative z-50 shadow-lg">
+        <h3 className="text-2xl font-extrabold mb-4">Connect & Collaborate</h3>
+        <p className="text-base leading-relaxed">
+          We begin by immersing ourselves in your brand&apos;s universe. Our
+          international client base feeds on trust, enduring partnerships, and
+          solid referrals.
+        </p>
+      </div>
+
+      {/* Card 2 */}
+      <div className="bg-white text-gray-800 p-8 pt-[80px] h-80 w-[350px] rounded-b-2xl relative z-40 -translate-y-12 shadow-lg">
+        <h3 className="text-2xl font-extrabold text-orange-500 mb-4">
+          Define Your Vision
+        </h3>
+        <p className="text-base leading-relaxed">
+          Brilliant campaigns begin with crystal-clear objectives. We reveal your
+          brand&apos;s purpose and develop targets that don&apos;t merely reach for the stars.
+        </p>
+      </div>
+
+      {/* Card 3 */}
+      <div className="bg-orange-500 text-white p-8 pt-[80px] h-80 w-[350px] rounded-b-2xl relative z-30 -translate-y-24 shadow-lg">
+        <h3 className="text-2xl font-extrabold mb-4">
+          Develop a Winning Strategy
+        </h3>
+        <p className="text-base leading-relaxed">
+          Our digital specialists don&apos;t merely plan; they create. We develop a
+          vibrant, results-driven media strategy.
+        </p>
+      </div>
+
+      {/* Card 4 */}
+      <div className="bg-white text-gray-800 p-8 pt-[80px] h-80 w-[350px] rounded-b-2xl relative z-20 -translate-y-36 shadow-lg">
+        <h3 className="text-2xl font-extrabold text-orange-500 mb-4">
+          Make It Happen
+        </h3>
+        <p className="text-base leading-relaxed">
+          Concepts are only as good as their implementation. Our service and
+          marketing teams work diligently.
+        </p>
+      </div>
+
+      {/* Card 5 */}
+      <div className="bg-orange-500 text-white p-8 pt-[80px] h-80 w-[350px] rounded-b-2xl relative z-10 -translate-y-48 shadow-lg">
+        <h3 className="text-2xl font-extrabold mb-4">Measure & Master</h3>
+        <p className="text-base leading-relaxed">
+          Outcomes count. We dig into the metrics, analyzing each campaign to call
+          out strengths.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+{/* Mobile Section 6 - Portfolio */}
+<section
+  className="min-h-screen flex flex-col justify-center relative bg-cover bg-center bg-no-repeat"
+  style={{
+    backgroundImage: "url('/images/working-table-with-computer 1.png')",
+  }}
+>
+  {/* Dark overlay */}
+  <div className="absolute inset-0 bg-black/60"></div>
+
+  {/* Section Heading */}
+  <div className="relative z-10 flex flex-col justify-center items-center text-center px-4 mb-12">
+    <h2 className="text-3xl font-bold text-orange-500 mb-2">
+      Our Portfolio
+    </h2>
+    <h3 className="text-lg font-semibold text-orange-500 mb-2">
+      We Advertise. We Amaze.
+    </h3>
+    <p className="text-white text-sm leading-relaxed max-w-md">
+      <span className="text-orange-500">&quot;don&apos;t tell, show&quot;</span> is our mantra. 
+      Our work speaks—bold, impactful, unforgettable.
+    </p>
+  </div>
+
+  {/* Manual Touch Scroll Logo Carousel */}
+  <div className="relative z-10 w-full bg-white py-6">
+    <div className="flex space-x-8 overflow-x-auto no-scrollbar px-4">
+      {[
+        "/images/11.png",
+        "/images/22.png",
+        "/images/33.png",
+        "/images/44.png",
+        "/images/55.png",
+        "/images/66.png",
+      ].map((logo, index) => (
+        <div
+          key={index}
+          className="relative flex-shrink-0"
+          style={{ width: "120px", height: "80px" }}
         >
-          <div className="text-center mb-8">
-            <h2 className="text-4xl font-extrabold text-orange-500 mb-6">
-              Our<br />Way
-            </h2>
-          </div>
+          <Image
+            src={logo}
+            alt={`Client Logo ${index + 1}`}
+            fill
+            style={{ objectFit: "contain" }}
+          />
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
 
-          <div className="space-y-8">
-            <div className="text-center">
-              <h3 className="text-2xl font-extrabold text-white mb-2">Listen</h3>
-              <p className="text-white text-sm leading-relaxed">
-                Every great idea begins with listening. We tune in closely to
-                understand who our clients are, what they value, and what they
-                truly need.
-              </p>
-            </div>
+{/* Hide scrollbar utility */}
+<style jsx>{`
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+`}</style>
 
-            <div className="text-center">
-              <h3 className="text-2xl font-extrabold text-white mb-2">Reflect</h3>
-              <p className="text-white text-sm leading-relaxed">
-                Clear, thoughtful thinking is where creativity sparks. The
-                sharper the thought, the stronger the idea.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <h3 className="text-2xl font-extrabold text-white mb-2">Create</h3>
-              <p className="text-white text-sm leading-relaxed">
-                Ideas alone are just words. When brought to life with purpose and
-                precision, they evolve into impact — and sometimes, into legacies.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Mobile Section 5 - Design Process */}
-        <section className="min-h-screen bg-white p-6 flex flex-col justify-center">
-          <div className="text-center mb-8 ">
-            <h2 className="text-3xl font-extrabold text-orange-500 mb-4">
-              Our Design Process
-            </h2>
-            <p className="text-gray-600 text-sm leading-relaxed">
-              Reboot Your Brand in <span className="text-orange-500">5 Daring Steps.</span>
-            </p>
-          </div>
-
-          <div className="relative mb-8 h-48">
-            <Image
-              src="/images/laptop-table.png"
-              alt="Design Process"
-              fill
-              style={{ objectFit: "contain" }}
-              priority
-            />
-          </div>
-
-          <div className="space-y-6">
-            <div className="text-center">
-              <h3 className="text-lg font-extrabold text-orange-500 mb-2">
-                Connect & Collaborate
-              </h3>
-              <p className="text-gray-600 text-xs leading-relaxed">
-                We begin by immersing ourselves in your brand&apos;s universe. Our international client base feeds on trust, enduring partnerships, and solid referrals.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <h3 className="text-lg font-extrabold text-orange-500 mb-2">
-                Define Your Vision
-              </h3>
-              <p className="text-gray-600 text-xs leading-relaxed">
-                Brilliant campaigns begin with crystal-clear objectives. We reveal your brand&apos;s purpose and develop targets that dont merely reach for the stars.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <h3 className="text-lg font-extrabold text-orange-500 mb-2">
-                Develop a Winning Strategy
-              </h3>
-              <p className="text-gray-600 text-xs leading-relaxed">
-                Our digital specialists dont merely plan; they create. We develop a vibrant, results-driven media strategy.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <h3 className="text-lg font-extrabold text-orange-500 mb-2">
-                Make It Happen
-              </h3>
-              <p className="text-gray-600 text-xs leading-relaxed">
-                Concepts are only as good as their implementation. Our service and marketing teams work diligently.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <h3 className="text-lg font-extrabold text-orange-500 mb-2">
-                Measure & Master
-              </h3>
-              <p className="text-gray-600 text-xs leading-relaxed">
-                Outcomes count. We dig into the metrics, analyzing each campaign to call out strengths.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Mobile Section 6 - Portfolio */}
-        <section className="min-h-screen bg-gray-300 p-6 flex flex-col justify-center">
-          <div className="relative mb-6 h-64 rounded-lg overflow-hidden">
-            <Image
-              src="/images/working-table-with-computer 1.png"
-              alt="Portfolio"
-              fill
-              style={{ objectFit: "cover" }}
-            />
-            <div className="absolute inset-0 bg-black bg-opacity-65 flex flex-col justify-center items-center text-center p-4">
-              <h2 className="text-3xl font-bold text-orange-500 mb-2">
-                Our Portfolio
-              </h2>
-              <h3 className="text-lg font-semibold text-orange-500 mb-2">
-                We Advertise. We Amaze.
-              </h3>
-              <p className="text-white text-xs leading-relaxed">
-                <span className="text-orange-500">&quot;dont tell, show&quot;</span> is git add .our mantra. Our work speaks—bold,
-                impactful, unforgettable.
-              </p>
-            </div>
-          </div>
-
-          {/* Mobile Logo Carousel  new updated nashnew*/}
-          <div className="relative bg-white rounded-lg p-4">
-            <div
-              ref={logoScrollRef}
-              className="flex space-x-8 overflow-x-auto scroll-smooth no-scrollbar pb-4"
-            >
-              {[
-                "/images/11.png",
-                "/images/22.png",
-                "/images/33.png",
-                "/images/44.png",
-                "/images/55.png",
-                "/images/66.png",
-              ].map((logo, index) => (
-                <div key={index} className="w-20 h-12 relative flex-shrink-0">
-                  <Image
-                    src={logo}
-                    alt={`Client Logo ${index + 1}`}
-                    fill
-                    style={{ objectFit: "contain" }}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Mobile Section 7 - Contact Form */}
+        {/* Mobile Section 7 - Contact Form nash new 25*/}
         <section className="min-h-screen bg-white p-6 flex flex-col">
           <div className="relative mb-6 h-48 rounded-lg overflow-hidden">
             <Image

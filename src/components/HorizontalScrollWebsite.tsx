@@ -487,7 +487,7 @@ const HorizontalScrollWebsite = () => {
             </div>
           </div>
 
-          {/* Mobile Logo Carousel */}
+          {/* Mobile Logo Carousel  new updated nashnew*/}
           <div className="relative bg-white rounded-lg p-4">
             <div
               ref={logoScrollRef}

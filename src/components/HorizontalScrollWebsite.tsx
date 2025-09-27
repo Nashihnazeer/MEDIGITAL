@@ -1252,4 +1252,5 @@ at captivating and converting on your budget.
   );
 };
 
+
 export default HorizontalScrollWebsite;

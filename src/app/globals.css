@@ -44,3 +44,6 @@ img {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+.hero-section > .absolute.bg-black\/60 {
+  display: none !important;
+}

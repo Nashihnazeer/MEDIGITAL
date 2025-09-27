@@ -213,91 +213,69 @@ const HorizontalScrollWebsite = () => {
   if (isMobile) {
     return (
       <div className="min-h-screen bg-white">
-{/* Section 1 - Hero */}
-<section
-  className="w-screen h-screen relative flex flex-col justify-center bg-[#EEAA45] text-white md:hidden rounded-b-[3rem] overflow-hidden "
-  style={{
-    backgroundImage: "url('/images/Bg_1.png')",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
-  }}
->
-  {/* Top Bar - Logo + Hamburger */}
-  <div className="flex items-center justify-between px-6 pt-6 absolute top-0 left-0 right-0 z-50">
-    <Image
-      src="/images/Logo.png"
-      alt="Logo"
-      width={100}
-      height={40}
-      className="cursor-pointer"
-    />
-    <button
-      onClick={() => setMenuOpen(!menuOpen)}
-      className="flex flex-col justify-between w-6 h-5 focus:outline-none"
-      aria-label={menuOpen ? "Close menu" : "Open menu"}
-    >
-      <span className="block h-0.5 bg-white rounded"></span>
-      <span className="block h-0.5 bg-white rounded"></span>
-      <span className="block h-0.5 bg-white rounded"></span>
-    </button>
-  </div>
-
-  {/* Mobile Menu Overlay */}
-  <div
-    ref={menuRef}
-    className={`fixed top-16 right-0 w-48 bg-white text-black rounded-md shadow-lg transform transition-transform duration-300 z-50 md:hidden 
-      ${menuOpen ? "translate-x-0 pointer-events-auto" : "translate-x-full pointer-events-none"}
-    `}
+{/* Section 1 - Hero with extended orange rounded background */}
+<div className="relative bg-[#EEAA45]rounded-b-[3rem]">
+  {/* Hero Section */}
+  <section
+    className="w-screen h-screen relative flex flex-col justify-center text-white md:hidden rounded-b-[3rem] overflow-hidden z-10"
+    style={{
+      backgroundImage: "url('/images/Bg_1.png')",
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
+    }}
   >
-    <ul className="flex flex-col space-y-4 p-4">
-      {["ABOUT US", "SERVICES", "PORTFOLIO", "BLOG"].map((item, idx) => (
-        <li key={idx} className="text-base font-medium cursor-pointer">
-          {item}
-        </li>
-      ))}
-
-      <li className="text-base font-medium cursor-pointer">
-        <a href="#reachouttous">REACH US</a>
-      </li>
-
-      <li className="mt-2 text-orange-500 font-medium">Creative</li>
-      <li className="text-orange-500 font-medium">Web</li>
-      <li className="text-orange-500 font-medium">Performance</li>
-      <li className="text-orange-500 font-medium">Content</li>
-    </ul>
-  </div>
-
-  {/* Centered Hero Content */}
-  <div className="flex flex-col items-center justify-center text-center px-6">
-    <Image
-      src="/images/Smiley.png"
-      alt="Smiley"
-      width={viewportWidth ? viewportWidth * 0.4 : 150}
-      height={viewportWidth ? viewportWidth * 0.4 : 150}
-      style={{ maxWidth: "100%", height: "auto" }}
-    />
-    <div
-      className="text-4xl font-extrabold text-white leading-snug mt-4"
-      style={{
-        textShadow: `
-          -2px 0 0 #D59A3F,
-          2px 0 0 #AF2648
-        `,
-      }}
-    >
-      <span>
-        Digital is <br /> what&apos;s <br /> happening.
-      </span>
+    {/* Top Bar - Logo + Hamburger */}
+    <div className="flex items-center justify-between px-6 pt-6 absolute top-0 left-0 right-0 z-50">
+      <Image
+        src="/images/Logo.png"
+        alt="Logo"
+        width={100}
+        height={40}
+        className="cursor-pointer"
+      />
+      <button
+        onClick={() => setMenuOpen(!menuOpen)}
+        className="flex flex-col justify-between w-6 h-5 focus:outline-none"
+        aria-label={menuOpen ? "Close menu" : "Open menu"}
+      >
+        <span className="block h-0.5 bg-white rounded"></span>
+        <span className="block h-0.5 bg-white rounded"></span>
+        <span className="block h-0.5 bg-white rounded"></span>
+      </button>
     </div>
 
-    {/* Downward Arrow */}
-    <ChevronDown className="w-10 h-10 mt-10 text-white animate-bounce" />
-  </div>
-</section>
+    {/* Centered Hero Content */}
+    <div className="flex flex-col items-center justify-center text-center px-6">
+      <Image
+        src="/images/Smiley.png"
+        alt="Smiley"
+        width={viewportWidth ? viewportWidth * 0.4 : 150}
+        height={viewportWidth ? viewportWidth * 0.4 : 150}
+        style={{ maxWidth: "100%", height: "auto" }}
+      />
+      <div
+        className="text-4xl font-extrabold text-white leading-snug mt-4"
+        style={{
+          textShadow: `
+            -2px 0 0 #D59A3F,
+            2px 0 0 #AF2648
+          `,
+        }}
+      >
+        <span>
+          Digital is <br /> what&apos;s <br /> happening.
+        </span>
+      </div>
 
-{/* Orange glow below the curved section */}
-<div className="w-screen h-6 rounded-b-[3rem] mx-auto bg-[#EEAA45]"></div>
+      {/* Downward Arrow */}
+      <ChevronDown className="w-10 h-10 mt-10 text-white animate-bounce" />
+    </div>
+  </section>
+
+  {/* Orange extended rounded background behind Section 1 */}
+  <div className="absolute bottom-[-10px] left-0 right-0 h-[80px] bg-[#EEAA45] w-full rounded-b-[3rem] z-0"></div>
+</div>
 {/* Section 2 - Ideas */}
 <section
   className="min-h-screen flex flex-col p-6 bg-cover bg-center bg-no-repeat"
@@ -541,64 +519,67 @@ const HorizontalScrollWebsite = () => {
   }
 `}</style>
 
-        {/* Mobile Section 7 - Contact Form nash new 25*/}
-        <section className="min-h-screen bg-white p-6 flex flex-col">
-          <div className="relative mb-6 h-48 rounded-lg overflow-hidden">
-            <Image
-              src="/images/black-wired-phone-black-background 1.png"
-              alt="Contact"
-              fill
-              style={{ objectFit: "cover" }}
-            />
-            <div className="absolute inset-0 bg-black bg-opacity-60 flex flex-col justify-center items-center text-center p-4">
-              <h2 className="text-3xl font-bold text-orange-500 mb-4">
-                Let&apos;s Talk!
-              </h2>
-              <p className="text-white text-sm leading-relaxed">
-                Ready to elevate your brand? Fill our quick form, and
-                we&apos;ll connect soon.
-              </p>
-            </div>
-          </div>
+       {/* Mobile Section 7 - Contact Form nash new 25 */}
+<section
+  className="min-h-screen bg-cover bg-center bg-no-repeat flex flex-col justify-center p-6"
+  style={{
+    backgroundImage: "url('/images/black-wired-phone-black-background 1.png')",
+  }}
+>
+  {/* Dark overlay for contrast */}
+  <div className="absolute inset-0 bg-black/0"></div>
 
-          <div className="flex-1 flex flex-col justify-center">
-            <h3 className="text-xl font-semibold text-orange-500 mb-6 text-center">
-              Reach out to us | Say hi
-            </h3>
-            
-            <form className="space-y-6">
-              <input
-                type="text"
-                placeholder="Name"
-                className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 bg-transparent focus:border-orange-500 focus:outline-none text-gray-700 placeholder-gray-400"
-              />
-              <input
-                type="email"
-                placeholder="Email id"
-                className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 bg-transparent focus:border-orange-500 focus:outline-none text-gray-700 placeholder-gray-400"
-              />
-              <input
-                type="tel"
-                placeholder="Mobile"
-                className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 bg-transparent focus:border-orange-500 focus:outline-none text-gray-700 placeholder-gray-400"
-              />
-              <textarea
-                placeholder="Message"
-                rows={3}
-                className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 bg-transparent focus:border-orange-500 focus:outline-none text-gray-700 placeholder-gray-400 resize-none"
-              />
-              <div className="text-center">
-                <button
-                  type="submit"
-                  className="bg-orange-500 text-white px-8 py-3 rounded-lg hover:bg-orange-600 transition-colors duration-300 font-medium"
-                >
-                  Submit
-                </button>
-              </div>
-            </form>
-          </div>
-        </section>
+  <div className="relative z-10 flex-1 flex flex-col justify-center items-center">
+    {/* Heading */}
+    <div className="text-center mb-8">
+      <h2 className="text-7xl font-bold text-orange-500 mb-4">
+        Let&apos;s Talk!
+      </h2>
+      <p className="text-white text-sm leading-relaxed max-w-md mx-auto">
+        Ready to elevate your brand? Fill our quick <br></br>form, and
+        we&apos;ll connect soon.  Prefer email?<br></br>Reach us at <span className="text-orange-500">connect@.com</span>
+      </p>
+    </div>
 
+    {/* Contact Form Card */}
+    <div className="bg-white/80 backdrop-blur-md rounded-2xl shadow-lg p-6 w-full max-w-md">
+      <h3 className="text-xl font-semibold text-orange-500 mb-6 text-center">
+        Reach out to us | Say hi
+      </h3>
+
+      <form className="space-y-6">
+        <input
+          type="text"
+          placeholder="Name"
+          className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 bg-transparent focus:border-orange-500 focus:outline-none text-gray-700 placeholder-gray-500"
+        />
+        <input
+          type="email"
+          placeholder="Email id"
+          className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 bg-transparent focus:border-orange-500 focus:outline-none text-gray-700 placeholder-gray-500"
+        />
+        <input
+          type="tel"
+          placeholder="Mobile"
+          className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 bg-transparent focus:border-orange-500 focus:outline-none text-gray-700 placeholder-gray-500"
+        />
+        <textarea
+          placeholder="Message"
+          rows={3}
+          className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 bg-transparent focus:border-orange-500 focus:outline-none text-gray-700 placeholder-gray-500 resize-none"
+        />
+        <div className="text-center">
+          <button
+            type="submit"
+            className="bg-orange-500 text-white px-8 py-3 rounded-lg hover:bg-orange-600 transition-colors duration-300 font-medium"
+          >
+            Submit
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
         {/* Mobile Section 8 - Search and Footer */}
         <section
           className="min-h-96 bg-black text-white p-6 flex flex-col justify-center items-center"

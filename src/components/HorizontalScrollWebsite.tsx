@@ -15,6 +15,7 @@ const HorizontalScrollWebsite = () => {
   const [viewportWidth, setViewportWidth] = useState<number>(0);
   const [viewportHeight, setViewportHeight] = useState<number>(0);
   const [isMobile, setIsMobile] = useState<boolean>(false);
+  
 
 
   useEffect(() => {
@@ -32,15 +33,29 @@ const HorizontalScrollWebsite = () => {
 
 
   // Mobile detection
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
+  // Mobile detection (handles landscape too)
+useEffect(() => {
+  const checkMobile = () => {
+    const ua = navigator.userAgent || navigator.vendor || (window as any).opera;
+
+    // Check userAgent for mobile/tablet keywords
+    const isTabletOrMobileUA =
+      /iPad|iPhone|iPod|Android|Tablet|PlayBook|Silk/i.test(ua);
+
+    // Also check screen size (important for iPadOS & Android tablets in "desktop mode")
+    const isSmallScreen = window.innerWidth <= 1366 && window.innerHeight <= 1024;
+
+    // Final decision → true if UA says mobile/tablet OR screen size is within tablet range
+    const shouldUseMobileLayout = isTabletOrMobileUA || isSmallScreen;
+
+    setIsMobile(shouldUseMobileLayout);
+  };
+
+  checkMobile();
+  window.addEventListener("resize", checkMobile);
+  return () => window.removeEventListener("resize", checkMobile);
+}, []);
+
 
   const scrollLogosLeft = () => {
     logoScrollRef.current?.scrollBy({ left: -200, behavior: "smooth" });
@@ -211,70 +226,118 @@ const HorizontalScrollWebsite = () => {
 
   // Mobile Layout
   if (isMobile) {
-    return (
-      <div className="min-h-screen bg-white">
-{/* Section 1 - Hero with extended orange rounded background */}
-<div className="relative bg-[#EEAA45]rounded-b-[3rem]">
-  {/* Hero Section */}
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Section 1 - Hero with extended orange rounded background */}
+      <div className="relative w-full">
   <section
-    className="w-screen h-screen relative flex flex-col justify-center text-white md:hidden rounded-b-[3rem] overflow-hidden z-10"
+  className="relative w-full h-screen flex flex-col justify-center items-center text-white rounded-b-[3rem] overflow-hidden z-20 bg-[#EEAA45]"
+  style={{
+    backgroundImage: "url('/images/Bg_1.png')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+  }}
+>
+  {/* Top Bar */}
+  <div className="flex items-center justify-between px-6 pt-6 absolute top-0 left-0 right-0 z-30">
+    <Image
+      src="/images/Logo.png"
+      alt="Logo"
+      width={100}
+      height={40}
+      className="cursor-pointer"
+    />
+    <button
+      onClick={() => setMenuOpen(!menuOpen)}
+      className="flex flex-col justify-between w-6 h-5 focus:outline-none z-40"
+    >
+      <span className="block h-0.5 bg-white rounded"></span>
+      <span className="block h-0.5 bg-white rounded"></span>
+      <span className="block h-0.5 bg-white rounded"></span>
+    </button>
+  </div>
+
+  {/* Slide-in White Menu */}
+<div
+  className={`absolute top-0 right-0 w-72 h-[500px] landscape:h-[350px] bg-white text-black shadow-2xl transform transition-transform duration-300 z-50 ${
+    menuOpen ? "translate-x-0" : "translate-x-full"
+  } rounded-bl-none landscape:rounded-bl-2xl`}
+  ref={menuRef}
+>
+  {/* Logo inside menu */}
+  <div className="flex items-center justify-between px-6 pt-6 absolute top-0 left-0 right-0 z-30 translate-x-[80px]">
+    <Image
+      src="/images/Group1234.png"
+      alt="Logo"
+      width={100}
+      height={40}
+      className="cursor-pointer"
+    />
+  </div>
+
+  {/* Menu Options */}
+  <div className="flex flex-col items-start p-6 translate-y-[120px]">
+    {/* Menu links with inline height */}
+    <a href="#home" className="text-lg font-semibold leading-[50px] landscape:leading-[50px]">
+      Home
+    </a>
+    <a href="#about" className="text-lg font-semibold leading-[50px] landscape:leading-[50px]">
+      About
+    </a>
+    <a href="#services" className="text-lg font-semibold leading-[50px] landscape:leading-[50px]">
+      Services
+    </a>
+    <a href="#portfolio" className="text-lg font-semibold leading-[50px] landscape:leading-[50px]">
+      Portfolio
+    </a>
+    <a href="#contact" className="text-lg font-semibold leading-[50px] landscape:leading-[50px]">
+      Contact
+    </a>
+  </div>
+</div>
+
+  {/* Centered Content */}
+  <div className="relative z-30 flex flex-col items-center justify-center text-center px-6">
+    <Image
+      src="/images/Smiley.png"
+      alt="Smiley"
+      width={150}
+      height={150}
+      className="
+        max-h-[300px]
+        max-w-[300px]
+        landscape:w-[200px]
+        landscape:h-[200px]
+        translate-y-[-100px]
+        landscape:translate-x-[-200px]
+        landscape:translate-y-[100px]
+      "
+    />
+  </div>
+
+  {/* Updated Text */}
+  <div
+    className="transform text-4xl font-extrabold text-white leading-snug landscape:-translate-y-[80px] landscape:translate-x-[200px]"
     style={{
-      backgroundImage: "url('/images/Bg_1.png')",
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-      backgroundRepeat: "no-repeat",
+      textShadow: `
+        -2px 0 0 #D59A3F,
+        2px 0 0 #AF2648
+      `,
     }}
   >
-    {/* Top Bar - Logo + Hamburger */}
-    <div className="flex items-center justify-between px-6 pt-6 absolute top-0 left-0 right-0 z-50">
-      <Image
-        src="/images/Logo.png"
-        alt="Logo"
-        width={100}
-        height={40}
-        className="cursor-pointer"
-      />
-      <button
-        onClick={() => setMenuOpen(!menuOpen)}
-        className="flex flex-col justify-between w-6 h-5 focus:outline-none"
-        aria-label={menuOpen ? "Close menu" : "Open menu"}
-      >
-        <span className="block h-0.5 bg-white rounded"></span>
-        <span className="block h-0.5 bg-white rounded"></span>
-        <span className="block h-0.5 bg-white rounded"></span>
-      </button>
-    </div>
+    <span>
+      Digital is <br /> what&apos;s <br /> happening.
+    </span>
+  </div>
 
-    {/* Centered Hero Content */}
-    <div className="flex flex-col items-center justify-center text-center px-6">
-      <Image
-        src="/images/Smiley.png"
-        alt="Smiley"
-        width={viewportWidth ? viewportWidth * 0.4 : 150}
-        height={viewportWidth ? viewportWidth * 0.4 : 150}
-        style={{ maxWidth: "100%", height: "auto" }}
-      />
-      <div
-        className="text-4xl font-extrabold text-white leading-snug mt-4"
-        style={{
-          textShadow: `
-            -2px 0 0 #D59A3F,
-            2px 0 0 #AF2648
-          `,
-        }}
-      >
-        <span>
-          Digital is <br /> what&apos;s <br /> happening.
-        </span>
-      </div>
-
-      {/* Downward Arrow */}
-      <ChevronDown className="w-10 h-10 mt-10 text-white animate-bounce" />
-    </div>
-  </section>
-
-  {/* Orange extended rounded background behind Section 1 */}
-  <div className="absolute bottom-[-10px] left-0 right-0 h-[80px] bg-[#EEAA45] w-full rounded-b-[3rem] z-0"></div>
+  {/* Chevron Down */}
+  <div className="translate-y-[250px] landscape:translate-y-[10px]">
+    <ChevronDown className="w-10 h-10 text-white animate-bounce" />
+  </div>
+</section>
+  {/* Extended Orange Background */}
+  <div className="absolute bottom-[-10px] left-0 right-0 h-[80px] bg-[#EEAA45] w-full rounded-b-[3rem] z-10"></div>
 </div>
 {/* Section 2 - Ideas */}
 <section
@@ -480,32 +543,32 @@ const HorizontalScrollWebsite = () => {
     </p>
   </div>
 
-  {/* Manual Touch Scroll Logo Carousel */}
-  <div className="relative z-10 w-full bg-white py-6">
-    <div className="flex space-x-8 overflow-x-auto no-scrollbar px-4">
-      {[
-        "/images/11.png",
-        "/images/22.png",
-        "/images/33.png",
-        "/images/44.png",
-        "/images/55.png",
-        "/images/66.png",
-      ].map((logo, index) => (
-        <div
-          key={index}
-          className="relative flex-shrink-0"
-          style={{ width: "120px", height: "80px" }}
-        >
-          <Image
-            src={logo}
-            alt={`Client Logo ${index + 1}`}
-            fill
-            style={{ objectFit: "contain" }}
-          />
-        </div>
-      ))}
-    </div>
+{/* Manual Touch Scroll Logo Carousel */}
+<div className="relative z-10 w-full bg-white py-6">
+  <div className="flex justify-center space-x-8 overflow-x-auto no-scrollbar px-4">
+    {[
+      "/images/11.png",
+      "/images/22.png",
+      "/images/33.png",
+      "/images/44.png",
+      "/images/55.png",
+      "/images/66.png",
+    ].map((logo, index) => (
+      <div
+        key={index}
+        className="relative flex-shrink-0"
+        style={{ width: "120px", height: "80px" }}
+      >
+        <Image
+          src={logo}
+          alt={`Client Logo ${index + 1}`}
+          fill
+          style={{ objectFit: "contain" }}
+        />
+      </div>
+    ))}
   </div>
+</div>
 </section>
 
 {/* Hide scrollbar utility */}

@@ -1,4 +1,6 @@
+// src/components/Servicelist.tsx
 import React from "react";
+import Image from "next/image";
 
 export type ServiceItem = {
   id?: string | number;
@@ -24,58 +26,65 @@ const ServicePillList: React.FC<Props> = ({
 }) => {
   return (
     <ul role="list" className="space-y-6">
-      {items.map((it, idx) => (
-        <li key={it.id ?? idx} className="relative">
-          <div className="flex items-center" style={{ height: pillHeight }}>
-            {/* White circular icon badge */}
-            <div
-              aria-hidden="true"
-              className="flex items-center justify-center rounded-full bg-white shadow-md"
-              style={{
-                width: iconSize,
-                height: iconSize,
-                marginLeft: -iconSize * overlap, // ⬅️ control overlap dynamically
-                zIndex: 20,
-              }}
-            >
-              <img
-                src={it.iconSrc ?? "/images/example.png"}
-                alt={it.iconAlt ?? it.label}
-                style={{
-                  width: Math.max(20, iconSize * iconInnerScale),
-                  height: Math.max(20, iconSize * iconInnerScale),
-                  objectFit: "contain",
-                }}
-                className="block"
-                draggable={false}
-              />
-            </div>
+      {items.map((it, idx) => {
+        const innerSize = Math.max(20, Math.round(iconSize * iconInnerScale));
+        const iconSrc = it.iconSrc ?? "/images/example.png";
+        const iconAlt = it.iconAlt ?? it.label;
 
-            {/* Orange pill */}
-            <div
-              className="flex items-center pl-6 pr-6 rounded-full shadow-inner"
-              style={{
-                background: "rgb(226,154,77)",
-                height: pillHeight * 0.92,
-                marginLeft: -iconSize * 0.2,
-                flex: 1,
-                zIndex: 10,
-              }}
-            >
-              <span
-                className="text-black font-medium text-base"
+        return (
+          <li key={it.id ?? idx} className="relative">
+            <div className="flex items-center" style={{ height: pillHeight }}>
+              {/* White circular icon badge */}
+              <div
+                aria-hidden="true"
+                className="flex items-center justify-center rounded-full bg-white shadow-md"
                 style={{
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
+                  width: iconSize,
+                  height: iconSize,
+                  marginLeft: -iconSize * overlap, // ⬅️ control overlap dynamically
+                  zIndex: 20,
                 }}
               >
-                {it.label}
-              </span>
+                {/* next/image for optimized icons (explicit width/height to avoid CLS) */}
+                <div style={{ width: innerSize, height: innerSize, position: "relative" }}>
+                  <Image
+                    src={iconSrc}
+                    alt={iconAlt}
+                    width={innerSize}
+                    height={innerSize}
+                    style={{ objectFit: "contain" }}
+                    // For remote hosts, add their domain in next.config.js images.domains
+                    // e.g. images: { domains: ['placehold.co', 'cdn.example.com'] }
+                  />
+                </div>
+              </div>
+
+              {/* Orange pill */}
+              <div
+                className="flex items-center pl-6 pr-6 rounded-full shadow-inner"
+                style={{
+                  background: "rgb(226,154,77)",
+                  height: pillHeight * 0.92,
+                  marginLeft: -iconSize * 0.2,
+                  flex: 1,
+                  zIndex: 10,
+                }}
+              >
+                <span
+                  className="text-black font-medium text-base"
+                  style={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {it.label}
+                </span>
+              </div>
             </div>
-          </div>
-        </li>
-      ))}
+          </li>
+        );
+      })}
     </ul>
   );
 };

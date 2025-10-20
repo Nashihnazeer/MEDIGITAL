@@ -5,7 +5,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 type NavItem = { label: string; href: string };
 
@@ -22,7 +22,6 @@ const SCROLL_DELAY_AFTER_NAV_MS = 300;
 const Header: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname() ?? "/";
-  const searchParams = useSearchParams();
   const [activeHash, setActiveHash] = useState<string | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
@@ -31,39 +30,57 @@ const Header: React.FC = () => {
   const toggleButtonRef = useRef<HTMLButtonElement | null>(null);
   const mobileMenuRef = useRef<HTMLDivElement | null>(null);
 
-  // ---- DEBUG: log pathname so we can see what exact path the page reports ----
+  // Client-only search string (avoid useSearchParams to prevent SSR/suspense issue)
+  const [searchString, setSearchString] = useState<string>("");
+
   useEffect(() => {
-    // NOTE: remove or silence this in production
-    // eslint-disable-next-line no-console
-    console.debug("[Header] pathname:", pathname, "search:", String(searchParams));
-  }, [pathname, searchParams]);
-  // ---------------------------------------------------------------------------
+    if (typeof window !== "undefined") {
+      setSearchString(window.location.search || "");
+    }
+  }, []);
+
+  // Debug logs only in dev
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      // keep logging for debug builds
+      // eslint-disable-next-line no-console
+      console.debug("[Header] pathname:", pathname, "search:", searchString);
+    }
+  }, [pathname, searchString]);
 
   // ----- HIDE CONDITIONS (robust) -----
-  const hideSubstrings = [
-    "horizontalscroll",
-    "horizontal-scroll",
-    "horizontal",
-    "horizontalscrollwebsite",
-  ];
+  const hideSubstrings = useMemo(
+    () => [
+      "horizontalscroll",
+      "horizontal-scroll",
+      "horizontal",
+      "horizontalscrollwebsite",
+    ],
+    []
+  );
 
   const pathnameLower = pathname.toLowerCase();
-  const searchString = String(searchParams || "");
+  const searchStringLower = (searchString || "").toLowerCase();
   const hash = typeof window !== "undefined" ? window.location.hash.toLowerCase() : "";
 
+  // support ?hideHeader=1 or ?hideHeader=true
+  const queryParams = typeof window !== "undefined" ? new URLSearchParams(searchString) : new URLSearchParams();
+  const hideHeaderFlag = queryParams.get("hideHeader");
   const shouldHideHeader =
     hideSubstrings.some((s) => pathnameLower.includes(s)) ||
-    hideSubstrings.some((s) => searchString.includes(s)) ||
+    hideSubstrings.some((s) => searchStringLower.includes(s)) ||
     hideSubstrings.some((s) => hash.includes(s)) ||
-    (searchParams && (searchParams.get("hideHeader") === "1" || searchParams.get("hideHeader") === "true"));
+    (hideHeaderFlag === "1" || hideHeaderFlag === "true");
 
   if (shouldHideHeader) {
-    // eslint-disable-next-line no-console
-    console.debug("[Header] hidden because route/search/hash matched hide rules:", {
-      pathname,
-      search: searchString,
-      hash,
-    });
+    if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console
+      console.debug("[Header] hidden because route/search/hash matched hide rules:", {
+        pathname,
+        search: searchString,
+        hash,
+      });
+    }
     return null;
   }
   // ------------------------------------------------------------------
@@ -121,7 +138,7 @@ const Header: React.FC = () => {
       return;
     }
 
-    // external links — leave default behavior
+    // external links — allow default behavior
   };
 
   // Quick helper to determine active state for routes
@@ -131,7 +148,7 @@ const Header: React.FC = () => {
     return pathname === href || pathname.startsWith(href + "/");
   };
 
-  // Close mobile menu on route change (robust)
+  // Close mobile menu on route change
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useParams } from "next/navigation";
 import { Post } from "@/types/post";
 import { readPosts } from "@/lib/storage";
@@ -69,17 +70,31 @@ export default function BlogDetailPage() {
 
   return (
     <main className="max-w-screen-xl mx-auto px-6 py-8">
-      <div className="relative rounded overflow-hidden mb-8">
-        <img
-          src={post.image}
-          alt={post.title}
-          className="w-full h-72 object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-transparent flex items-end p-8">
-          <h1 className="text-white text-3xl md:text-4xl font-extrabold">
-            {post.title}
-          </h1>
-        </div>
+      {/* Hero */}
+      <div className="relative rounded overflow-hidden mb-8 h-[350px]">
+        {post.image ? (
+          <>
+            <div className="absolute inset-0">
+              <Image
+                src={post.image}
+                alt={post.title}
+                fill
+                sizes="100vw"
+                style={{ objectFit: "cover" }}
+                priority
+              />
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-transparent flex items-end p-8">
+              <h1 className="text-white text-3xl md:text-4xl font-extrabold">
+                {post.title}
+              </h1>
+            </div>
+          </>
+        ) : (
+          <div className="w-full h-full bg-gray-200 flex items-center justify-center p-8">
+            <h1 className="text-2xl font-bold">{post.title}</h1>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -169,12 +184,14 @@ export default function BlogDetailPage() {
               className="rounded overflow-hidden shadow-sm bg-white"
             >
               <Link href={`/blog/${p.id}`} className="block">
-                <div className="h-48 w-full overflow-hidden bg-gray-100">
+                <div className="relative h-48 w-full overflow-hidden bg-gray-100">
                   {p.image ? (
-                    <img
+                    <Image
                       src={p.image}
                       alt={p.title}
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="(max-width: 640px) 100vw, 33vw"
+                      style={{ objectFit: "cover" }}
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-sm text-gray-400">

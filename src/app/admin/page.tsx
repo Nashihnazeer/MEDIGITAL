@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Post } from "@/types/post";
 import { readPosts, writePosts } from "@/lib/storage";
 import { JSX } from "react/jsx-runtime";
+import Image from "next/image";
 
 /**
  * Admin page — Next.js App Router client component
@@ -83,8 +84,6 @@ export default function AdminPage(): JSX.Element {
 
   function resetToSeed() {
     if (!confirm("Reset to seed data?")) return;
-    // Reuse storage.ts SEED by writing directly; easiest is to clear and reload readPosts
-    // But to avoid circular import issues, we reconstruct the same seed inline:
     const seed: Post[] = [
       {
         id: "post-1",
@@ -157,8 +156,20 @@ export default function AdminPage(): JSX.Element {
           ) : (
             posts.map((p) => (
               <div key={p.id} className="flex items-center gap-4 bg-white p-3 rounded shadow">
-                <div className="w-28 h-20 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                  {p.image ? <img src={p.image} alt={p.title} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-sm text-gray-400">No image</div>}
+                <div className="relative w-28 h-20 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                  {p.image ? (
+                    <Image
+                      src={p.image}
+                      alt={p.title}
+                      fill
+                      style={{ objectFit: "cover" }}
+                      sizes="112px"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-sm text-gray-400">
+                      No image
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex-1">
@@ -231,8 +242,18 @@ export default function AdminPage(): JSX.Element {
           <div className="bg-white rounded shadow p-4">
             <div className="md:flex gap-6">
               <div className="md:flex-1">
-                <div className="h-48 w-full overflow-hidden rounded mb-4 bg-gray-100">
-                  {form.image ? <img src={form.image} alt={form.title} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-400">No image</div>}
+                <div className="h-48 w-full overflow-hidden rounded mb-4 bg-gray-100 relative">
+                  {form.image ? (
+                    <Image
+                      src={form.image}
+                      alt={form.title}
+                      fill
+                      style={{ objectFit: "cover" }}
+                      sizes="100vw"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">No image</div>
+                  )}
                 </div>
                 <h4 className="font-bold text-xl mb-2">{form.title}</h4>
                 <div className="text-sm text-gray-500 mb-3">{form.category} • {form.date} • {form.author}</div>

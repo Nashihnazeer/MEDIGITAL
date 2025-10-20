@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { readPosts } from "@/lib/storage";
 import { Post } from "@/types/post";
 import Header from "@/components/Header";
@@ -55,12 +56,16 @@ export default function BlogListPage() {
                 className="bg-white shadow-sm rounded overflow-hidden hover:shadow-md transition"
               >
                 <Link href={`/blog/${post.id}`} className="block">
-                  <div className="h-48 w-full overflow-hidden bg-gray-100">
+                  {/* image wrapper uses relative + next/image fill */}
+                  <div className="relative h-48 w-full overflow-hidden bg-gray-100">
                     {post.image ? (
-                      <img
+                      <Image
                         src={post.image}
                         alt={post.title}
-                        className="w-full h-full object-cover"
+                        fill
+                        style={{ objectFit: "cover" }}
+                        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                        priority={false}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-sm text-gray-400">
@@ -106,12 +111,14 @@ export default function BlogListPage() {
                 >
                   <Link href={`/blog/${post.id}`} className="block">
                     {/* Taller image to create portrait/rectangular card */}
-                    <div className="h-64 w-full overflow-hidden bg-gray-100">
+                    <div className="relative h-64 w-full overflow-hidden bg-gray-100">
                       {post.image ? (
-                        <img
+                        <Image
                           src={post.image}
                           alt={post.title}
-                          className="w-full h-full object-cover"
+                          fill
+                          style={{ objectFit: "cover" }}
+                          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-sm text-gray-400">

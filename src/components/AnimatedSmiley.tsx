@@ -1,6 +1,7 @@
-// /components/AnimatedSmiley.tsx
+// src/components/AnimatedSmiley.tsx
 import React, { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import Image from "next/image";
 
 type SafeImgProps = {
   src?: string;
@@ -10,10 +11,9 @@ type SafeImgProps = {
   width?: number | string;
   height?: number | string;
   loading?: "lazy" | "eager" | "auto";
-  decoding?: "async" | "sync" | "auto";
   priority?: boolean;
   fetchPriority?: "auto" | "high" | "low";
-  crossOrigin?: "anonymous" | "use-credentials" | "";
+  // decoding, crossOrigin intentionally omitted because next/image manages optimizations.
 };
 
 const AnimatedSmiley: React.FC<SafeImgProps> = ({
@@ -24,12 +24,11 @@ const AnimatedSmiley: React.FC<SafeImgProps> = ({
   width,
   height,
   loading,
-  decoding,
   priority,
   fetchPriority,
-  crossOrigin,
 }) => {
   const prefersReducedMotion = useReducedMotion();
+
   const [isMobile, setIsMobile] = useState<boolean>(() =>
     typeof window === "undefined" ? false : window.matchMedia("(max-width: 640px)").matches
   );
@@ -37,7 +36,8 @@ const AnimatedSmiley: React.FC<SafeImgProps> = ({
   useEffect(() => {
     if (typeof window === "undefined") return;
     const mq = window.matchMedia("(max-width: 640px)");
-    const onChange = (e: MediaQueryListEvent | MediaQueryList) => setIsMobile((e as any).matches);
+    const onChange = (e: MediaQueryListEvent | MediaQueryList) =>
+      setIsMobile((e as any).matches);
     if (mq.addEventListener) mq.addEventListener("change", onChange);
     else mq.addListener(onChange as any);
     return () => {
@@ -46,31 +46,10 @@ const AnimatedSmiley: React.FC<SafeImgProps> = ({
     };
   }, []);
 
-  if (prefersReducedMotion) {
-    return (
-      <img
-        src={src}
-        alt={alt}
-        className={`select-none pointer-events-none ${className}`}
-        style={{ height: "auto", maxWidth: "100%", ...(style || {}) }}
-        width={width as any}
-        height={height as any}
-        {...(loading ? { loading: loading === "auto" ? undefined : loading } : {})}
-        {...(decoding ? { decoding } : {})}
-        {...(crossOrigin ? { crossOrigin } : {})}
-      />
-    );
-  }
-
-  /**
-   * Align keyframe lengths: scale and rotate arrays have same number of items.
-   * Using rotate values that progress to 720 for a clean 2-turn spin.
-   * transformOrigin ensures the rotation is centered.
-   */
-
+  // Animations (same frames you had)
   const mobileAnimation = {
-    scale: [1, 1.12, 1, 0.97, 1], // 5 frames
-    rotate: [0, 180, 360, 540, 720], // 5 frames -> 2 full turns over the animation
+    scale: [1, 1.12, 1, 0.97, 1],
+    rotate: [0, 180, 360, 540, 720],
     transition: {
       duration: 2.2,
       ease: "easeInOut",
@@ -80,8 +59,8 @@ const AnimatedSmiley: React.FC<SafeImgProps> = ({
   } as any;
 
   const desktopAnimation = {
-    scale: [1, 1.28, 1, 0.92, 1], // 5 frames
-    rotate: [0, 180, 360, 540, 720], // 5 frames
+    scale: [1, 1.28, 1, 0.92, 1],
+    rotate: [0, 180, 360, 540, 720],
     transition: {
       duration: 3.5,
       ease: "easeInOut",
@@ -92,7 +71,7 @@ const AnimatedSmiley: React.FC<SafeImgProps> = ({
 
   const interactionProps = { whileHover: { scale: 1.08 }, whileTap: { scale: 0.96 } } as const;
 
-  // Make sure transform origin is center so scale/rotate look correct
+  // merged style: keep transform origin so rotation centers
   const mergedStyle: React.CSSProperties = {
     height: "auto",
     maxWidth: "100%",
@@ -100,29 +79,63 @@ const AnimatedSmiley: React.FC<SafeImgProps> = ({
     ...(style || {}),
   };
 
-  const forwardLoading = loading === "lazy" || loading === "eager" ? loading : undefined;
-  const forwardFetchPriority =
-    fetchPriority === "auto" || fetchPriority === "high" || fetchPriority === "low"
-      ? fetchPriority
-      : undefined;
+  // Helper: render Next Image either with explicit width/height or with fill (relative parent)
+  const renderImage = () => {
+    // If width and height are provided as numbers, use them directly (static sizing)
+    const numericWidth = typeof width === "number" ? width : undefined;
+    const numericHeight = typeof height === "number" ? height : undefined;
 
+    // If both numeric width and height are provided, use fixed sizing Image
+    if (numericWidth && numericHeight) {
+      return (
+        <Image
+          src={src}
+          alt={alt}
+          width={numericWidth}
+          height={numericHeight}
+          style={{ objectFit: "contain", ...mergedStyle }}
+          priority={Boolean(priority)}
+          
+          fetchPriority={fetchPriority}
+          loading={loading === "eager" ? "eager" : "lazy"}
+        />
+      );
+    }
+
+    // Otherwise use fill inside a relative container so Image covers the available area
+    return (
+      <div className={`relative w-full ${height ? "" : "h-auto"}`} style={height ? { height } : undefined}>
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          style={{ objectFit: "cover", ...mergedStyle }}
+          priority={Boolean(priority)}
+          loading={loading === "eager" ? "eager" : "lazy"}
+        />
+      </div>
+    );
+  };
+
+  // If user prefers reduced motion, render static Image (no motion wrapper)
+  if (prefersReducedMotion) {
+    return (
+      <div className={`select-none pointer-events-none ${className}`} style={mergedStyle}>
+        {renderImage()}
+      </div>
+    );
+  }
+
+  // Animated: wrap the Image in a motion.div and animate the wrapper
   return (
-    <motion.img
-      src={src}
-      alt={alt}
-      draggable={false}
+    <motion.div
       {...interactionProps}
       animate={isMobile ? mobileAnimation : desktopAnimation}
       className={`block will-change-transform select-none pointer-events-auto ${className}`}
       style={mergedStyle}
-      width={width as any}
-      height={height as any}
-      {...(forwardLoading ? { loading: forwardLoading } : {})}
-      {...(decoding ? { decoding } : {})}
-      {...(crossOrigin ? { crossOrigin } : {})}
-      {...(forwardFetchPriority ? { fetchPriority: forwardFetchPriority } : {})}
-      {...(priority ? { "data-priority": "true" } : {})}
-    />
+    >
+      {renderImage()}
+    </motion.div>
   );
 };
 

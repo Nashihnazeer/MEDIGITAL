@@ -2,8 +2,27 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
+import AnimatedSmiley from "@/components/AnimatedSmiley";
+import ServicePillList, { ServiceItem } from "@/components/Servicelist";
+import logoData, { type LogoItem } from "@/data/logoData";
 
-const HorizontalScrollWebsite = () => {
+
+
+
+
+
+const services: ServiceItem[] = [
+  { label: "Social Media Marketing", iconSrc: "/images/Socialmediamarketting.png" },
+  { label: "Google Ads", iconSrc: "/images/Googleads.png" },
+  { label: "Performance Marketing", iconSrc: "/images/PFMarketing.png" },
+  { label: "Organic Promotions", iconSrc: "/images/Organicmarketing.png" },
+  { label: "Influencer Marketing", iconSrc: "/images/Influencer marketting.png" },
+  { label: "Email Marketing", iconSrc: "/images/Emailmarketting.png" },
+  { label: "Content Marketing", iconSrc: "/images/Contentmarketting.png" },
+];
+
+
+  export default function HorizontalScrollWebsite() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const verticalSectionsRef = useRef<HTMLDivElement | null>(null);
   const rafRef = useRef<number | null>(null);
@@ -16,7 +35,29 @@ const HorizontalScrollWebsite = () => {
   const [viewportHeight, setViewportHeight] = useState<number>(0);
   const [isMobile, setIsMobile] = useState<boolean>(false);
   
+  // ---------- hooks & tiny handlers (paste here, only once) ----------
+ 
+  const [modalOpen, setModalOpen] = useState(false);
+  const [activeLogo, setActiveLogo] = useState<LogoItem | null>(null);
 
+  const openModal = (item: LogoItem) => {
+    setActiveLogo(item);
+    setModalOpen(true);
+  };
+  const closeModal = () => {
+    setModalOpen(false);
+    setActiveLogo(null);
+  };
+
+  const scrollLogosLeft = () => {
+    if (!logoScrollRef.current) return;
+    logoScrollRef.current.scrollBy({ left: -240, behavior: "smooth" });
+  };
+  const scrollLogosRight = () => {
+    if (!logoScrollRef.current) return;
+    logoScrollRef.current.scrollBy({ left: 240, behavior: "smooth" });
+  };
+  // --------------------------------------------------------------------
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -57,13 +98,7 @@ useEffect(() => {
 }, []);
 
 
-  const scrollLogosLeft = () => {
-    logoScrollRef.current?.scrollBy({ left: -200, behavior: "smooth" });
-  };
 
-  const scrollLogosRight = () => {
-    logoScrollRef.current?.scrollBy({ left: 200, behavior: "smooth" });
-  };
 
   // Resize / initial sizes (only for desktop)
   useEffect(() => {
@@ -97,6 +132,52 @@ useEffect(() => {
     window.addEventListener("resize", updateSizes);
     return () => window.removeEventListener("resize", updateSizes);
   }, [isMobile]);
+
+// send email api
+const API_URL = 'http://127.0.0.1:5001/send-email';
+
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  const f = e.currentTarget;
+  const fd = new FormData(f);
+  const payload = {
+    name: fd.get('name')?.toString() ?? '',
+    email: fd.get('email')?.toString() ?? '',
+    mobile: fd.get('mobile')?.toString() ?? '',
+    message: fd.get('message')?.toString() ?? ''
+  };
+  console.log('Submitting payload:', payload);
+
+  try {
+    const controller = new AbortController();
+    const tid = setTimeout(() => controller.abort(), 15000);
+
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+      mode: 'cors'
+    });
+
+    clearTimeout(tid);
+    console.log('Fetch returned:', res.status, res.statusText);
+    const text = await res.text();
+    console.log('Response text:', text);
+    try {
+      const json = JSON.parse(text || '{}');
+      console.log('Response JSON:', json);
+      if (res.ok && json.ok) { alert('✅ Message sent'); f.reset(); return; }
+      alert('❌ Send failed: ' + (json.error || text));
+    } catch {
+      alert('❌ Send failed (non-JSON): ' + text);
+    }
+  } catch (err: any) {
+    console.error('Fetch error (client):', err);
+    alert('⚠️ Error sending message: ' + (err?.message || err));
+  }
+};
+
 
   // Hide horizontal overflow (only for desktop)
   useEffect(() => {
@@ -299,11 +380,9 @@ useEffect(() => {
 
   {/* Centered Content */}
   <div className="relative z-30 flex flex-col items-center justify-center text-center px-6">
-    <Image
+    <AnimatedSmiley
       src="/images/Smiley.png"
       alt="Smiley"
-      width={150}
-      height={150}
       className="
         max-h-[300px]
         max-w-[300px]
@@ -610,36 +689,47 @@ useEffect(() => {
         Reach out to us | Say hi
       </h3>
 
-      <form className="space-y-6">
-        <input
-          type="text"
-          placeholder="Name"
-          className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 bg-transparent focus:border-orange-500 focus:outline-none text-gray-700 placeholder-gray-500"
-        />
-        <input
-          type="email"
-          placeholder="Email id"
-          className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 bg-transparent focus:border-orange-500 focus:outline-none text-gray-700 placeholder-gray-500"
-        />
-        <input
-          type="tel"
-          placeholder="Mobile"
-          className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 bg-transparent focus:border-orange-500 focus:outline-none text-gray-700 placeholder-gray-500"
-        />
-        <textarea
-          placeholder="Message"
-          rows={3}
-          className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 bg-transparent focus:border-orange-500 focus:outline-none text-gray-700 placeholder-gray-500 resize-none"
-        />
-        <div className="text-center">
-          <button
-            type="submit"
-            className="bg-orange-500 text-white px-8 py-3 rounded-lg hover:bg-orange-600 transition-colors duration-300 font-medium"
-          >
-            Submit
-          </button>
-        </div>
-      </form>
+<form onSubmit={handleSubmit} className="space-y-6">
+  <input
+    type="text"
+    name="name"
+    placeholder="Name"
+    required
+    className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 bg-transparent focus:border-orange-500 focus:outline-none text-gray-700 placeholder-gray-500"
+  />
+
+  <input
+    type="email"
+    name="email"
+    placeholder="Email id"
+    required
+    className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 bg-transparent focus:border-orange-500 focus:outline-none text-gray-700 placeholder-gray-500"
+  />
+
+  <input
+    type="tel"
+    name="mobile"
+    placeholder="Mobile"
+    className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 bg-transparent focus:border-orange-500 focus:outline-none text-gray-700 placeholder-gray-500"
+  />
+
+  <textarea
+    name="message"
+    placeholder="Message"
+    rows={3}
+    required
+    className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 bg-transparent focus:border-orange-500 focus:outline-none text-gray-700 placeholder-gray-500 resize-none"
+  />
+
+  <div className="text-center">
+    <button
+      type="submit"
+      className="bg-orange-500 text-white px-8 py-3 rounded-lg hover:bg-orange-600 transition-colors duration-300 font-medium"
+    >
+      Submit
+    </button>
+  </div>
+</form>
     </div>
   </div>
 </section>
@@ -753,77 +843,169 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Main Hero Content */}
-          <div className="flex flex-1 px-10 items-center justify-between">
-            {/* Left Navigation Menu - Vertical Words */}
-            <div className="flex flex-col items-center relative">
-<ul className="flex flex-col items-center space-y-[80px]">
-  {["ABOUT US", "SERVICES", "PORTFOLIO", "BLOG", "REACH US"].map(
-    (item, idx) => (
-      <li
-        key={idx}
-        className="text-gray-200 font-medium text-[9px] hover:text-orange-400 transition-colors duration-300"
-        style={{
-          transform: "rotate(-90deg)",
-          transformOrigin: "center",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {item === "REACH US" ? (
-          <a href="#reachouttous" className="cursor-pointer">
-            {item}
+        {/* Main Hero Content */}
+<div className="flex flex-1 px-10 items-center justify-between">
+  {/* Left Navigation Menu - Vertical Words */}
+  <div className="flex flex-col items-center relative">
+    <ul className="flex flex-col items-center space-y-[80px]">
+      {[
+        { label: "ABOUT US", href: "#aboutus" },
+        { label: "SERVICES", href: "#services" },
+        { label: "PORTFOLIO", href: "#portfolio" },
+        { label: "BLOG", href: "/blog" }, // ✅ Updated: blog will now open /blog page
+        { label: "REACH US", href: "#reachusdesktop" },
+      ].map((item, idx) => (
+        <li
+          key={idx}
+          className="text-gray-200 font-medium text-[9px] hover:text-orange-400 transition-colors duration-300"
+          style={{
+            transform: "rotate(-90deg)",
+            transformOrigin: "center",
+            whiteSpace: "nowrap",
+          }}
+        >
+          <a
+            href={item.href}
+            className="cursor-pointer"
+            onClick={(e) => {
+              // ✅ Allow /blog to navigate normally
+              if (item.href === "/blog") return; // <--- Let Next.js handle navigation
+              
+              // Otherwise, handle smooth scrolling for anchors
+              e.preventDefault();
+              const id = item.href.replace(/^#/, "");
+              const el = document.getElementById(id);
+              if (!el) {
+                console.warn("Target not found:", id);
+                return;
+              }
+
+              const rect0 = el.getBoundingClientRect();
+              const absoluteTopBefore = rect0.top + window.pageYOffset;
+
+              const getScrollParents = (node: HTMLElement | null): HTMLElement[] => {
+                const parents: HTMLElement[] = [];
+                let p = node?.parentElement || null;
+                while (p) {
+                  const style = getComputedStyle(p);
+                  const overflowY = style.overflowY;
+                  const isScrollable =
+                    /(auto|scroll|overlay)/.test(overflowY) &&
+                    p.scrollHeight > p.clientHeight;
+                  if (isScrollable) parents.push(p);
+                  p = p.parentElement;
+                }
+                return parents;
+              };
+
+              const wait = (ms: number) =>
+                new Promise((res) => setTimeout(res, ms));
+
+              (async () => {
+                try {
+                  el.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                    inline: "nearest",
+                  });
+                } catch {}
+
+                const parents = getScrollParents(el);
+                for (let i = 0; i < parents.length; i++) {
+                  const parent = parents[i];
+                  const parentRect = parent.getBoundingClientRect();
+                  const elRect = el.getBoundingClientRect();
+                  const offset =
+                    elRect.top - parentRect.top + (parent.scrollTop || 0);
+                  const maxScroll =
+                    parent.scrollHeight - parent.clientHeight;
+                  const target = Math.min(
+                    Math.max(0, offset),
+                    Math.max(0, maxScroll)
+                  );
+                  try {
+                    parent.scrollTo({ top: target, behavior: "smooth" });
+                  } catch {
+                    parent.scrollTop = target;
+                  }
+                  await wait(160);
+                }
+
+                const finalRect = el.getBoundingClientRect();
+                const isVisible =
+                  finalRect.top >= 0 && finalRect.top < window.innerHeight;
+                if (isVisible) return;
+
+                const headerOffset = 0;
+                const desired = Math.max(0, absoluteTopBefore - headerOffset);
+                const maxScroll =
+                  document.documentElement.scrollHeight - window.innerHeight;
+                const finalTarget = Math.min(
+                  desired,
+                  Math.max(0, maxScroll)
+                );
+                window.scrollTo({ top: finalTarget, behavior: "smooth" });
+              })();
+            }}
+          >
+            {item.label}
           </a>
-        ) : (
-          item
-        )}
-      </li>
-    )
-  )}
-</ul>
-              <div className="absolute right-[-30px] top-[-50px] h-[480px] w-[2px] bg-gray-500"></div>
-            </div>
+        </li>
+      ))}
+    </ul>
 
-            {/* Center Hero Text */}
-            <div className="flex flex-col items-start justify-center space-y-8">
-              <div
-                className="text-[70px] font-extrabold leading-snug max-w-lg text-white -translate-x-20"
-                style={{
-                  textShadow: `
-                    -2px 0 0 #D59A3F,
-                    2px 0 0 #AF2648
-                  `,
-                }}
-              >
-                <span>
-                  Digital is <br /> what&apos;s <br /> happening.
-                </span>
-              </div>
+    <div className="absolute right-[-30px] top-[-50px] h-[480px] w-[2px] bg-gray-500"></div>
+  </div>
 
-              <div className="flex items-center text-sm translate-y-[70px] -translate-x-28">
-                <span className="text-[#FF9800] font-medium">Creative</span>
-                <span className="mx-[20px] text-white text-lg">•</span>
+  {/* Center Hero Text */}
+  <div className="flex flex-col items-start justify-center space-y-8">
+    <div
+      className="text-[70px] font-extrabold leading-snug max-w-lg text-white -translate-x-20"
+      style={{
+        textShadow: `
+          -2px 0 0 #D59A3F,
+          2px 0 0 #AF2648
+        `,
+      }}
+    >
+      <span>
+        Digital is <br /> what&apos;s <br /> happening.
+      </span>
+    </div>
 
-                <span className="text-[#FF9800] font-medium">Web</span>
-                <span className="mx-[20px] text-white text-lg">•</span>
+    <div className="flex items-center text-sm translate-y-[70px] -translate-x-28">
+      <span className="text-[#FF9800] font-medium">Creative</span>
+      <span className="mx-[20px] text-white text-lg">•</span>
 
-                <span className="text-[#FF9800] font-medium">Performance</span>
-                <span className="mx-[20px] text-white text-lg">•</span>
+      <span className="text-[#FF9800] font-medium">Web</span>
+      <span className="mx-[20px] text-white text-lg">•</span>
 
-                <span className="text-[#FF9800] font-medium">Content</span>
-              </div>
-            </div>
+      <span className="text-[#FF9800] font-medium">Performance</span>
+      <span className="mx-[20px] text-white text-lg">•</span>
+
+      <span className="text-[#FF9800] font-medium">Content</span>
+    </div>
+  </div>
+
+
 
             {/* Right Content - Smiley Image */}
-            <div className="relative flex-shrink-0">
-              <Image
-                src="/images/Smiley.png"
-                alt="Smiley"
-                width={viewportWidth ? viewportWidth * 0.25 + 80 : 300}
-                height={viewportWidth ? viewportWidth * 0.25 + 80 : 300}
-                style={{ maxWidth: "100%", height: "auto" }}
-                className="scale-110 -translate-x-[180px] -translate-y-[0px]"
-              />
-            </div>
+<div
+  className="relative flex-shrink-0
+             scale-110 -translate-x-[180px] -translate-y-[0px]"
+>
+  <AnimatedSmiley
+    src="/images/Smiley.png"
+    alt="Smiley"
+    // no translate/scale classes here — animation controls transforms
+    className=""
+    style={{
+      maxWidth: "100%",
+      height: "auto",
+      width: viewportWidth ? viewportWidth * 0.25 + 80 : 300,
+    }}
+  />
+</div>
           </div>
         </section>
 
@@ -857,27 +1039,25 @@ useEffect(() => {
 
         {/* Section 3 - Services */}
         <section className="w-screen h-screen flex justify-between items-center px-10 bg-gray-200">
-          <div className="w-1/2 translate-x-[700px]">
-            <ul className="space-y-7 text-sm text-gray-800">
-              <li>• Social Media Marketing</li>
-              <li>• Google Ads</li>
-              <li>• Search Engine Optimisation</li>
-              <li>• Organic Promotions</li>
-              <li>• Influencer Marketing</li>
-              <li>• Email Marketing</li>
-              <li>• App Promotions</li>
-              <li>• Content Marketing</li>
-            </ul>
-          </div>
+        <div className="p-6 max-w-xl mx-auto translate-x-[700px] w-[400px]">
+      <ServicePillList
+  items={services}
+  iconSize={60}        // makes the circle larger
+  iconInnerScale={0.7} // makes the icon inside fill more space
+  overlap={0.55}        // increases how much the circle overlaps the pill
+/>
+    </div>
 
           <div className="w-1/2 text-left translate-x-[-400px]">
             <h2 className="text-7xl font-extrabold text-black mb-4">
               Need a <br />digital<br /> marketing<br /> partner?
             </h2>
-            <p className="text-gray-600 max-w-lg ml-auto text-left -translate-x-20 translate-y-5 text-[11px]">
+            <div style={{ width: "60%", height: "2px", backgroundColor: "black" }}></div>
+            <p className="text-gray-600 max-w-lg  ml-auto text-left -translate-x-[180px] translate-y-[-0px] text-[15px] my-5 py-2">
               Marketing doesn&apos;t have to be complicated. With us, it&apos;s<br /> smart,
               simple, and effective. Let&apos;s get started.
             </p>
+            <div style={{ width: "60%", height: "2px", backgroundColor: "black" }}></div>
           </div>
         </section>
       </div>
@@ -911,83 +1091,151 @@ useEffect(() => {
             </h2>
           </div>
 
-          <div>
+          <div className="relative flex flex-col items-center text-center text-white mt-20 translate-y-[100px]">
+  {/* === Headings row === */}
+  <div className="grid grid-cols-3 gap-12 w-full max-w-5xl mb-3">
+    <div>
+      <h2 className="text-3xl font-extrabold text-[#e29a4d] mb-1">Listen</h2>
+    </div>
+    <div>
+      <h2 className="text-3xl font-extrabold text-[#e29a4d] mb-1">Reflect</h2>
+    </div>
+    <div>
+      <h2 className="text-3xl font-extrabold text-[#e29a4d] mb-1">Create</h2>
+    </div>
+  </div>
 
-          <div className="translate-y-[210px] translate-x-[-150px]">
-            <h2 className="text-3xl font-extrabold text-white mb-1">
-            Listen
+  {/* === Orange line + white arrows === */}
+  <div className="relative w-full max-w-5xl mb-8">
+    {/* orange line */}
+    <div className="h-[2px] bg-[#e29a4d] w-full" />
 
-            </h2>
-            <p className="text-white max-w-lg  text-[8px] leading-relaxed" style={{ width: "400px" }}>
-            Every great idea begins with<br></br>
+    {/* arrows */}
+    <div
+      className="absolute left-[16.6%] -translate-x-1/2"
+      style={{ top: "100%" }}
+    >
+      <div
+        style={{
+          width: 0,
+          height: 0,
+          borderLeft: "8px solid transparent",
+          borderRight: "8px solid transparent",
+          borderTop: "10px solid white",
+        }}
+      />
+    </div>
+    <div
+      className="absolute left-1/2 -translate-x-1/2"
+      style={{ top: "100%" }}
+    >
+      <div
+        style={{
+          width: 0,
+          height: 0,
+          borderLeft: "8px solid transparent",
+          borderRight: "8px solid transparent",
+          borderTop: "10px solid white",
+        }}
+      />
+    </div>
+    <div
+      className="absolute left-[83.3%] -translate-x-1/2"
+      style={{ top: "100%" }}
+    >
+      <div
+        style={{
+          width: 0,
+          height: 0,
+          borderLeft: "8px solid transparent",
+          borderRight: "8px solid transparent",
+          borderTop: "10px solid white",
+        }}
+      />
+    </div>
+  </div>
+
+  {/* === Paragraphs row === */}
+  <div className="grid grid-cols-3 gap-12 w-full max-w-5xl text-left">
+    {/* Listen */}
+    <div>
+      <p className="text-white text-[14px] leading-relaxed max-w-xs">
+        Every great idea begins with<br></br>
 listening. We tune in closely to<br></br>
 understand who our clients are,<br></br>
 what they value, and what they<br></br>
 truly need.
+      </p>
+    </div>
 
-            </p>
-            </div>
-            <div className="translate-y-[106px] translate-x-[150px]">
-            <h2 className="text-3xl font-extrabold text-white mb-1">
-            Reflect
-            </h2>
-            <p className="text-white max-w-lg  text-[8px] leading-relaxed" style={{ width: "400px" }}>
-            Clear, thoughtful thinking is<br></br>
+    {/* Reflect */}
+    <div>
+      <p className="text-white text-[14px] leading-relaxed max-w-xs">
+        Clear, thoughtful thinking is<br></br>
 where creativity sparks. The<br></br>
 sharper the thought, the<br></br>
 stronger the idea.
-            </p>
-            </div>
-            <div className="translate-y-[15px] translate-x-[450px]">
-            <h2 className="text-3xl font-extrabold text-white mb-1">
-            Create
-            </h2>
-            <p className="text-white max-w-lg  text-[8px] leading-relaxed" style={{ width: "400px" }}>
-            Ideas alone are just words. When<br></br>
+      </p>
+    </div>
+
+    {/* Create */}
+    <div>
+      <p className="text-white text-[14px] leading-relaxed max-w-xs">
+        Ideas alone are just words. When<br></br>
 brought to life with purpose and<br></br>
-precision, they evolve into impact —<br></br>
-and sometimes, into legacies.
-            </p>
-            </div>
-            </div>
+precision, they evolve into impact — and sometimes, into<br></br>legacies.
+      </p>
+    </div>
+  </div>
+</div>
         </section>
 
         {/* Section 5 - Design Process */}
         <section className="w-screen h-screen relative flex items-center justify-between bg-white px-10">
-          <div className="w-1/2 translate-x-[650px] translate-y-[-200px]">
-            <h2 className="text-5xl font-extrabold text-orange-500 mb-6" style={{ width: "300px" }}>
-              Our Design <br /> Process
-            </h2>
-            <p className="text-gray-600 text-sm leading-relaxed w-full" style={{ width: "300px" }}>
-            Reboot Your Brand in <span className="text-orange-500">5 Daring Steps.</span> 
-            </p>
-            
-          </div>
+          <div className="flex items-center justify-start w-full translate-y-[-250px] sm:translate-x-[750px]">
+  {/* Big number 4 */}
+  <div className="text-[180px] font-extrabold text-orange-500 leading-none flex-shrink-0">
+    4
+  </div>
 
-          
-          <div className="w-1/2 relative h-screen flex items-center justify-start translate-x-[-185px]">
-  <div className="w-[470px] h-screen relative">
-    <Image
-      src="/images/laptop-table.png"
-      alt="Design Process"
-      fill
-      style={{ objectFit: "cover" }} // same fit as second block
-      priority
-      className="transition-all duration-300"
-    />
-    
-    {/* Orange line */}
-    <div className="absolute h-[2px] bg-orange-500 w-[1000px] translate-x-[100px] translate-y-[280px]" />
+  {/* Text block (aligned perfectly with the height of 4) */}
+  <div className="ml-4 flex flex-col justify-center h-[180px] leading-none">
+    <h2 className="text-[80px] font-extrabold text-orange-500">Daring</h2>
+    <h2 className="text-[80px] font-extrabold text-orange-500">Steps.</h2>
+
+    {/* Subtext below */}
+    <p className="text-black text-sm leading-relaxed mt-2">
+      Reboot Your Brand in{" "}
+      <span className="text-orange-500 font-semibold">4 Daring Steps.</span>
+    </p>
   </div>
 </div>
 
-          <div className="translate-x-[-450px]">
-            <div className="translate-y-[50px]">
+          
+          <div className="w-1/2 relative h-screen flex items-center justify-start translate-x-[-185px]">
+  <div className="relative w-[470px] h-screen -mt-20 z-20">
+  <Image
+    src="/images/laptop-table.png"
+    alt="Design Process"
+    fill
+    priority
+    style={{ objectFit: "cover" }}
+    className="transition-all duration-300"
+  />
+
+    
+    {/* Orange line */}
+    <div className="absolute h-[2px] bg-orange-500 w-[1000px] translate-x-[100px] translate-y-[300px]" />
+  </div>
+</div>
+
+          <div className="translate-x-[-550px]">
+            <div className="translate-y-[80px]">
             <h2 className="text-3xl font-extrabold text-orange-500 mb-1">
             Connect & <br></br>
             Collaborate
             </h2>
-            <p className="text-white max-w-lg  text-[8px] leading-relaxed" style={{ width: "400px" }}>
+            <p className="text-white max-w-lg  text-[13px] leading-relaxed" style={{ width: "400px" }}>
             We begin by immersing ourselves in your brand&apos;s <br></br>
 universe. Our international client base feeds on trust, <br></br>
 enduring partnerships, and solid referrals. Let&apos;s get <br></br>
@@ -998,12 +1246,12 @@ something amazing.
 
 
 
-            <div className="translate-y-[100px]">
+            <div className="translate-y-[150px]">
             <h2 className="text-3xl font-extrabold text-orange-500 mb-1">
             Make It <br></br>
 Happen
             </h2>
-            <p className="text-white  text-[8px] leading-relaxed"
+            <p className="text-white  text-[13px] leading-relaxed"
             style={{ width: "400px" }}>
 Concepts are only as good as their implementation. Our<br></br>
 service and marketing teams work diligently,<br></br>
@@ -1017,13 +1265,13 @@ panache.
             </div>
 
 
-            <div className="translate-x-[-550px]">
-            <div className="translate-y-[50px]">
+            <div className="translate-x-[-570px]">
+            <div className="translate-y-[-15px]">
             <h2 className="text-3xl font-extrabold text-orange-500 mb-1">
             Define <br></br>
 Your Vision
             </h2>
-            <p className="text-black max-w-lg  text-[8px] leading-relaxed" style={{ width: "400px" }}>
+            <p className="text-black max-w-lg  text-[13px] leading-relaxed" style={{ width: "400px" }}>
             Brilliant campaigns begin with crystal-clear<br></br>
 objectives. We reveal your brand&apos;s purpose and<br></br>
 develop targets that dont merely reach for the stars—<br></br>
@@ -1034,40 +1282,36 @@ and resonates.
 
 
 
-            <div className="translate-y-[100px]">
-            <h2 className="text-3xl font-extrabold text-orange-500 mb-1">
-            Measure & <br></br>
-Master
-            </h2>
-            <p className="text-black  text-[8px] leading-relaxed"
-            style={{ width: "400px" }}>
-           Outcomes count. We dig into the metrics, analyzing<br></br>
-each campaign to call out strengths, identify<br></br>
-opportunities, and optimize for maximum<br></br>
-effectiveness. Your success fuels wiser strategies for<br></br>
-the future.
-
-            </p>
-            </div>
+            
 
 
             </div>
 
 
-            <div className="translate-x-[-650px]">
+            <div className="translate-x-[-600px]">
             <div className="translate-y-[-25px]">
             <h2 className="text-3xl font-extrabold text-orange-500 mb-1">
             Develop a <br></br>
 Winning Strategy
             </h2>
-            <p className="text-black max-w-lg  text-[8px] leading-relaxed" style={{ width: "400px" }}>
+            <p className="text-black max-w-lg  text-[13px] leading-relaxed" style={{ width: "400px" }}>
             Our digital specialists dont merely plan; they<br></br>
 create. We develop a vibrant, results-driven media<br></br>
 strategy that&apos;s as distinctive as your brand, aimed<br></br>
 at captivating and converting on your budget.
             </p>
             </div>
+            
             </div>
+            <div className="absolute bottom-[100px] right-[200px] z-20">
+        <Image
+          src="/images/daringsteps.png"
+          alt="Daring Steps"
+          width={350} // adjust as needed
+          height={350}
+          className="object-contain"
+        />
+      </div>
         </section>
 
 {/* Section 6 - Portfolio */}
@@ -1129,42 +1373,62 @@ at captivating and converting on your budget.
     </button>
 
     {/* Logos */}
-    <div
-      ref={logoScrollRef}
-      className="flex space-x-16 w-full py-4 overflow-x-auto scroll-smooth no-scrollbar"
+    {/* Logos */}
+<div
+  ref={logoScrollRef}
+  className="flex space-x-16 w-full py-4 overflow-x-auto scroll-smooth no-scrollbar"
+>
+  {logoData.map((logo) => (
+    <button
+      key={logo.id}
+      type="button"
+      onClick={() => openModal(logo)}
+      className="w-32 h-20 relative flex-shrink-0 focus:outline-none"
+      aria-label={logo.title}
     >
-      {[
-        "/images/11.png",
-        "/images/22.png",
-        "/images/33.png",
-        "/images/44.png",
-        "/images/55.png",
-        "/images/66.png",
-        "/images/11.png",
-        "/images/22.png",
-        "/images/33.png",
-        "/images/44.png"
-      ].map((logo, index) => (
-        <div key={index} className="w-32 h-20 relative flex-shrink-0">
-          <Image
-            src={logo}
-            alt={`Client Logo ${index + 1}`}
-            fill
-            style={{ objectFit: "contain" }}
-            className="hover:scale-110 transition-transform duration-300"
-          />
-        </div>
-      ))}
-    </div>
+      <div className="relative w-full h-full">
+        <Image
+          src={logo.src}
+          alt={logo.title}
+          fill
+          style={{ objectFit: "contain" }}
+          className="hover:scale-110 transition-transform duration-300"
+        />
+      </div>
+    </button>
+  ))}
+</div>
   </div>
 
   </div>
   
 </section>
+{/* Simple Modal */}
+{modalOpen && activeLogo && (
+  <div
+    role="dialog"
+    aria-modal="true"
+    className="fixed inset-0 z-50 flex items-center justify-center px-4"
+    onClick={closeModal} // clicking outside closes
+  >
+    <div className="absolute inset-0 bg-black/60" />
+    <div className="relative z-10 max-w-lg w-full bg-white rounded-2xl shadow-xl p-6" onClick={(e) => e.stopPropagation()}>
+      <button type="button" onClick={closeModal} className="absolute top-3 right-3 text-gray-600 hover:text-black">✕</button>
 
+      <div className="flex justify-center mb-4">
+        <div className="relative w-48 h-20">
+          <Image src={activeLogo.src} alt={activeLogo.title} fill style={{ objectFit: "contain" }} />
+        </div>
+      </div>
+
+      <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">{activeLogo.title}</h3>
+      <p className="text-center text-gray-700 text-sm leading-relaxed">{activeLogo.body}</p>
+    </div>
+  </div>
+)}
 
         {/* Section 7 - Contact Form */}
-        <section className="w-screen h-screen relative flex items-center justify-between bg-white px-10">
+        <section id="reachusdesktop" className="w-screen h-screen relative flex items-center justify-between bg-white px-10" >
           {/* Left side - Rectangle image with content */}
           <div className="w-1/2 relative h-full flex items-center justify-start translate-x-[115px]">
             <div className="w-[470px] h-screen relative">
@@ -1197,46 +1461,53 @@ at captivating and converting on your budget.
                 Reach out to us | Say hi
               </h3>
               
-              <form className="space-y-6 mt-8">
-                <div>
-                  <input
-                    type="text"
-                    placeholder="Name"
-                    className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 bg-transparent focus:border-orange-500 focus:outline-none text-gray-700 placeholder-gray-400"
-                  />
-                </div>
-                
-                <div>
-                  <input
-                    type="email"
-                    placeholder="Email id"
-                    className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 bg-transparent focus:border-orange-500 focus:outline-none text-gray-700 placeholder-gray-400"
-                  />
-                </div>
-                
-                <div>
-                  <input
-                    type="tel"
-                    placeholder="Mobile"
-                    className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 bg-transparent focus:border-orange-500 focus:outline-none text-gray-700 placeholder-gray-400"
-                  />
-                </div>
-                
-                <div>
-                  <textarea
-                    placeholder="Message"
-                    rows={3}
-                    className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 bg-transparent focus:border-orange-500 focus:outline-none text-gray-700 placeholder-gray-400 resize-none"
-                  />
-                </div>
-                
-                <button
-                  type="submit"
-                  className="bg-orange-500 text-white px-8 py-2 rounded-lg hover:bg-orange-600 transition-colors duration-300 font-medium"
-                >
-                  Submit
-                </button>
-              </form>
+              <form onSubmit={handleSubmit} className="space-y-6 mt-8">
+  <div>
+    <input
+      type="text"
+      name="name"
+      placeholder="Name"
+      required
+      className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 bg-transparent focus:border-orange-500 focus:outline-none text-gray-700 placeholder-gray-400"
+    />
+  </div>
+
+  <div>
+    <input
+      type="email"
+      name="email"
+      placeholder="Email id"
+      required
+      className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 bg-transparent focus:border-orange-500 focus:outline-none text-gray-700 placeholder-gray-400"
+    />
+  </div>
+
+  <div>
+    <input
+      type="tel"
+      name="mobile"
+      placeholder="Mobile"
+      className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 bg-transparent focus:border-orange-500 focus:outline-none text-gray-700 placeholder-gray-400"
+    />
+  </div>
+
+  <div>
+    <textarea
+      name="message"
+      placeholder="Message"
+      rows={3}
+      required
+      className="w-full px-0 py-3 border-0 border-b-2 border-gray-300 bg-transparent focus:border-orange-500 focus:outline-none text-gray-700 placeholder-gray-400 resize-none"
+    />
+  </div>
+
+  <button
+    type="submit"
+    className="bg-orange-500 text-white px-8 py-2 rounded-lg hover:bg-orange-600 transition-colors duration-300 font-medium"
+  >
+    Submit
+  </button>
+</form>
             </div>
           </div>
         </section>
@@ -1315,5 +1586,3 @@ at captivating and converting on your budget.
   );
 };
 
-
-export default HorizontalScrollWebsite;

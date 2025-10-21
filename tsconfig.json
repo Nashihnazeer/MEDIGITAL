@@ -26,5 +26,13 @@
     "**/*.ts",
     "**/*.tsx"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    ".next",
+    "out",
+    "dist",
+    "my-blog",
+    "my-blog/**",
+    "my-blog/*"
+  ]
 }

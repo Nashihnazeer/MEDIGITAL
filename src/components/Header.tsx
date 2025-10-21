@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 // src/components/Header.tsx
 "use client";
 
@@ -21,139 +20,45 @@ const SCROLL_DELAY_AFTER_NAV_MS = 300;
 
 const Header: React.FC = () => {
   const router = useRouter();
-  const pathname = usePathname() ?? "/";
+  const pathname = usePathname() ?? "";
+
+  // === hooks (all declared up front; do NOT conditionally return before these) ===
   const [activeHash, setActiveHash] = useState<string | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
-  // Mobile menu state
   const [mobileOpen, setMobileOpen] = useState(false);
   const toggleButtonRef = useRef<HTMLButtonElement | null>(null);
   const mobileMenuRef = useRef<HTMLDivElement | null>(null);
 
-  // Client-only search string (avoid useSearchParams to prevent SSR/suspense issue)
   const [searchString, setSearchString] = useState<string>("");
 
+  // Memo for anchor ids (stable)
+  const anchorIds = useMemo(
+    () => navItems.filter((n) => n.href.startsWith("#")).map((n) => n.href.replace("#", "")),
+    []
+  );
+
+  // Client-only search string setter
   useEffect(() => {
     if (typeof window !== "undefined") {
       setSearchString(window.location.search || "");
     }
   }, []);
 
-  // Debug logs only in dev
+  // Debug logging only in dev
   useEffect(() => {
     if (process.env.NODE_ENV === "development") {
-      // keep logging for debug builds
       // eslint-disable-next-line no-console
       console.debug("[Header] pathname:", pathname, "search:", searchString);
     }
   }, [pathname, searchString]);
-
-  // ----- HIDE CONDITIONS (robust) -----
-  const hideSubstrings = useMemo(
-    () => [
-      "horizontalscroll",
-      "horizontal-scroll",
-      "horizontal",
-      "horizontalscrollwebsite",
-    ],
-    []
-  );
-
-  const pathnameLower = pathname.toLowerCase();
-  const searchStringLower = (searchString || "").toLowerCase();
-  const hash = typeof window !== "undefined" ? window.location.hash.toLowerCase() : "";
-
-  // support ?hideHeader=1 or ?hideHeader=true
-  const queryParams = typeof window !== "undefined" ? new URLSearchParams(searchString) : new URLSearchParams();
-  const hideHeaderFlag = queryParams.get("hideHeader");
-  const shouldHideHeader =
-    hideSubstrings.some((s) => pathnameLower.includes(s)) ||
-    hideSubstrings.some((s) => searchStringLower.includes(s)) ||
-    hideSubstrings.some((s) => hash.includes(s)) ||
-    (hideHeaderFlag === "1" || hideHeaderFlag === "true");
-
-  if (shouldHideHeader) {
-    if (process.env.NODE_ENV === "development") {
-      // eslint-disable-next-line no-console
-      console.debug("[Header] hidden because route/search/hash matched hide rules:", {
-        pathname,
-        search: searchString,
-        hash,
-      });
-    }
-    return null;
-  }
-  // ------------------------------------------------------------------
-
-  // ids to observe (anchor-only)
-  const anchorIds = useMemo(
-    () => navItems.filter((n) => n.href.startsWith("#")).map((n) => n.href.replace("#", "")),
-    []
-  );
-
-  // utility: scroll to an element smoothly if present
-  const smoothScrollTo = (hashVal: string) => {
-    const id = hashVal.replace(/^#/, "");
-    const el = typeof document !== "undefined" ? document.getElementById(id) : null;
-    if (!el) {
-      console.warn("[Header] Anchor not found:", id);
-      return false;
-    }
-    el.scrollIntoView({ behavior: "smooth", block: "start" });
-    try {
-      history.replaceState(null, "", "#" + id);
-    } catch {
-      /* ignore */
-    }
-    return true;
-  };
-
-  // Handles click on nav items
-  const handleClick = (e: React.MouseEvent, href: string) => {
-    // Close mobile menu when navigating
-    const closeMobile = () => setMobileOpen(false);
-
-    if (href.startsWith("/")) {
-      e.preventDefault();
-      closeMobile();
-      router.push(href);
-      return;
-    }
-
-    if (href.startsWith("#")) {
-      e.preventDefault();
-      closeMobile();
-      if (pathname === "/") {
-        smoothScrollTo(href);
-        return;
-      }
-      try {
-        router.push("/" + href);
-      } catch {
-        console.warn("[Header] router.push failed for hash navigation:", href);
-      }
-      setTimeout(() => {
-        smoothScrollTo(href);
-      }, SCROLL_DELAY_AFTER_NAV_MS);
-      return;
-    }
-
-    // external links — allow default behavior
-  };
-
-  // Quick helper to determine active state for routes
-  const isRouteActive = (href: string) => {
-    if (!href || !href.startsWith("/")) return false;
-    if (href === "/") return pathname === "/";
-    return pathname === href || pathname.startsWith(href + "/");
-  };
 
   // Close mobile menu on route change
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
 
-  // Close on escape and click outside
+  // Close on escape and detect outside clicks
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -177,19 +82,24 @@ const Header: React.FC = () => {
     };
   }, [mobileOpen]);
 
-  // Scroll spy: observe anchors on the page and highlight nav items appropriately.
+  // Scroll-spy observation (only runs in browser)
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    // if not homepage, clear activeHash and attempt a one-time scroll to any hash
     if (pathname !== "/") {
       setActiveHash(null);
       const urlHash = window.location.hash;
       if (urlHash) {
-        smoothScrollTo(urlHash);
+        // try to scroll once
+        const id = urlHash.replace(/^#/, "");
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
       }
       return;
     }
 
+    // disconnect previous observer
     if (observerRef.current) {
       observerRef.current.disconnect();
       observerRef.current = null;
@@ -211,10 +121,8 @@ const Header: React.FC = () => {
       const visible = entries
         .filter((en) => en.isIntersecting)
         .sort((a, b) => (b.intersectionRatio || 0) - (a.intersectionRatio || 0));
-
       if (visible.length > 0) {
-        const id = visible[0].target.id;
-        setActiveHash("#" + id);
+        setActiveHash("#" + visible[0].target.id);
       } else {
         setActiveHash(null);
       }
@@ -224,7 +132,9 @@ const Header: React.FC = () => {
     observerRef.current = obs;
 
     if (window.location.hash) {
-      smoothScrollTo(window.location.hash);
+      const id = window.location.hash.replace(/^#/, "");
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
     return () => {
@@ -233,13 +143,119 @@ const Header: React.FC = () => {
     };
   }, [pathname, anchorIds]);
 
+  // hashchange listener
   useEffect(() => {
     const onHashChange = () => {
-      if (window.location.hash) smoothScrollTo(window.location.hash);
+      if (window.location.hash) {
+        const id = window.location.hash.replace(/^#/, "");
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     };
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
+  // === end of hooks ===
+
+  // ----- HIDE CONDITIONS (robust) -----
+  const hideSubstrings = [
+    "horizontalscroll",
+    "horizontal-scroll",
+    "horizontal",
+    "horizontalscrollwebsite",
+  ];
+
+  const pathnameLower = (pathname || "").toLowerCase();
+  const searchStringLower = (searchString || "").toLowerCase();
+  const hash = typeof window !== "undefined" ? window.location.hash.toLowerCase() : "";
+
+  // support ?hideHeader=1 or ?hideHeader=true
+  const queryParams = typeof window !== "undefined" ? new URLSearchParams(searchString) : new URLSearchParams();
+  const hideHeaderFlag = queryParams.get("hideHeader");
+  const shouldHideHeader =
+    hideSubstrings.some((s) => pathnameLower.includes(s)) ||
+    hideSubstrings.some((s) => searchStringLower.includes(s)) ||
+    hideSubstrings.some((s) => hash.includes(s)) ||
+    hideHeaderFlag === "1" ||
+    hideHeaderFlag === "true";
+
+  if (shouldHideHeader) {
+    if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console
+      console.debug("[Header] hidden because route/search/hash matched hide rules:", {
+        pathname,
+        search: searchString,
+        hash,
+      });
+    }
+    return null;
+  }
+
+  // anchor -> route map (adjust if the route name differs)
+  const anchorRouteMap: Record<string, string> = {
+    "#reachusdesktop": "/horizontalscrollwebsite",
+  };
+
+  // utility: smooth scroll
+  const smoothScrollTo = (hashVal: string) => {
+    const id = hashVal.replace(/^#/, "");
+    const el = typeof document !== "undefined" ? document.getElementById(id) : null;
+    if (!el) {
+      console.warn("[Header] Anchor not found:", id);
+      return false;
+    }
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    try {
+      history.replaceState(null, "", "#" + id);
+    } catch {
+      /* ignore */
+    }
+    return true;
+  };
+
+  const handleClick = (e: React.MouseEvent, href: string) => {
+    const closeMobile = () => setMobileOpen(false);
+
+    if (href.startsWith("/")) {
+      e.preventDefault();
+      closeMobile();
+      router.push(href);
+      return;
+    }
+
+    if (href.startsWith("#")) {
+      e.preventDefault();
+      closeMobile();
+
+      const targetRoute = anchorRouteMap[href] ?? "/";
+
+      if (pathname === targetRoute) {
+        smoothScrollTo(href);
+        return;
+      }
+
+      try {
+        router.push(targetRoute + href);
+      } catch (err) {
+        console.warn("[Header] router.push failed for anchor navigation:", err);
+      }
+
+      // fallback attempt
+      setTimeout(() => {
+        smoothScrollTo(href);
+      }, SCROLL_DELAY_AFTER_NAV_MS);
+
+      return;
+    }
+
+    // external - default
+  };
+
+  const isRouteActive = (href: string) => {
+    if (!href || !href.startsWith("/")) return false;
+    if (href === "/") return pathname === "/";
+    return pathname === href || pathname.startsWith(href + "/");
+  };
 
   return (
     <header
@@ -248,7 +264,6 @@ const Header: React.FC = () => {
       aria-label="Main header"
     >
       <div className="max-w-[1400px] mx-auto flex items-center justify-between px-4 sm:px-8 py-3">
-        {/* Logo */}
         <Link href="/" aria-label="Go to homepage" className="flex items-center space-x-2">
           <div className="relative w-[90px] h-[34px] sm:w-[100px] sm:h-[35px]">
             <Image
@@ -261,16 +276,14 @@ const Header: React.FC = () => {
           </div>
         </Link>
 
-        {/* Desktop nav */}
         <nav role="navigation" aria-label="Primary navigation" className="hidden md:block">
           <ul className="flex items-center space-x-6">
             {navItems.map((item) => {
-              const active =
-                item.href.startsWith("/")
-                  ? isRouteActive(item.href)
-                  : item.href.startsWith("#")
-                  ? activeHash === item.href
-                  : false;
+              const active = item.href.startsWith("/")
+                ? isRouteActive(item.href)
+                : item.href.startsWith("#")
+                ? activeHash === item.href
+                : false;
 
               const baseClass = "text-sm font-medium tracking-wide transition-colors";
               const linkClass = active
@@ -289,12 +302,7 @@ const Header: React.FC = () => {
 
               return (
                 <li key={item.label}>
-                  <a
-                    href={item.href}
-                    onClick={(e) => handleClick(e, item.href)}
-                    className={linkClass}
-                    aria-current={active ? "page" : undefined}
-                  >
+                  <a href={item.href} onClick={(e) => handleClick(e, item.href)} className={linkClass} aria-current={active ? "page" : undefined}>
                     {item.label}
                   </a>
                 </li>
@@ -303,7 +311,6 @@ const Header: React.FC = () => {
           </ul>
         </nav>
 
-        {/* Right-side actions: contact button + mobile toggle */}
         <div className="flex items-center gap-3">
           <button
             className="hidden md:inline-flex bg-[#E29A4D] hover:bg-[#ffae54] text-black font-semibold text-xs px-4 py-2 rounded-md transition-all duration-300"
@@ -320,7 +327,6 @@ const Header: React.FC = () => {
             Contact Us
           </button>
 
-          {/* Mobile menu toggle */}
           <button
             ref={toggleButtonRef}
             className="inline-flex items-center justify-center p-2 rounded-md md:hidden text-gray-200 hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-400"
@@ -331,10 +337,8 @@ const Header: React.FC = () => {
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" aria-hidden>
               {mobileOpen ? (
-                // close icon
                 <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               ) : (
-                // hamburger
                 <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               )}
             </svg>
@@ -342,21 +346,21 @@ const Header: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile menu panel */}
       <div
         id="mobile-navigation"
         ref={mobileMenuRef}
-        className={`md:hidden bg-[#262626]/95 backdrop-blur-sm border-t border-white/5 transition-all duration-200 overflow-hidden ${mobileOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"}`}
+        className={`md:hidden bg-[#262626]/95 backdrop-blur-sm border-t border-white/5 transition-all duration-200 overflow-hidden ${
+          mobileOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
+        }`}
       >
         <div className="px-4 py-4 space-y-3">
           <nav aria-label="Mobile primary" className="space-y-1">
             {navItems.map((item) => {
-              const active =
-                item.href.startsWith("/")
-                  ? isRouteActive(item.href)
-                  : item.href.startsWith("#")
-                  ? activeHash === item.href
-                  : false;
+              const active = item.href.startsWith("/")
+                ? isRouteActive(item.href)
+                : item.href.startsWith("#")
+                ? activeHash === item.href
+                : false;
 
               const baseClass = "block px-3 py-2 rounded text-base font-medium transition-colors";
               const linkClass = active

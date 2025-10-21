@@ -762,28 +762,31 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
             </button>
           </div>
 
-          <div className="flex justify-center space-x-6">
-            {[
-              "/images/Insta.png",
-              "/images/Facebook.png", 
-              "/images/Youtube.png",
-              "/images/Twitter.png",
-              "/images/Linkedin.png"
-            ].map((social, index) => (
-              <a
-                key={index}
-                href="#"
-                className="w-8 h-8 relative flex items-center justify-center hover:scale-110 transition-transform duration-300"
-              >
-                <Image
-                  src={social}
-                  alt={`Social Icon ${index + 1}`}
-                  width={32}
-                  height={32}
-                />
-              </a>
-            ))}
-          </div>
+         <div className="flex justify-center space-x-6">
+  {[
+    { src: "/images/Insta.png", alt: "Instagram", href: "https://www.instagram.com/me__digital/" },
+    { src: "/images/Facebook.png", alt: "Facebook", href: "https://www.facebook.com/MediaExpressionDigital/" },
+    { src: "/images/Youtube.png", alt: "YouTube", href: "https://www.youtube.com/@mediaexpressiondigital" }, // update if needed
+    { src: "/images/Twitter.png", alt: "Twitter", href: "https://twitter.com" }, // replace with actual link if available
+    { src: "/images/Linkedin.png", alt: "LinkedIn", href: "https://www.linkedin.com/company/mediaexpressiondigital/posts/?feedView=all" },
+  ].map((social, index) => (
+    <a
+      key={index}
+      href={social.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="w-8 h-8 relative flex items-center justify-center hover:scale-110 transition-transform duration-300"
+    >
+      <Image
+        src={social.src}
+        alt={social.alt}
+        width={32}
+        height={32}
+        className="object-contain"
+      />
+    </a>
+  ))}
+</div>
         </section>
       </div>
     );
@@ -823,23 +826,31 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                 height={40}
                 className="cursor-pointer"
               />
-              <div className="flex space-x-4">
-                {[
-                  { src: "/images/Insta.png", alt: "Instagram" },
-                  { src: "/images/Facebook.png", alt: "Facebook" },
-                  { src: "/images/Youtube.png", alt: "YouTube" },
-                  { src: "/images/Twitter.png", alt: "Twitter" },
-                  { src: "/images/Linkedin.PNG", alt: "LinkedIn" },
-                ].map((icon, index) => (
-                  <a
-                    key={index}
-                    href="#"
-                    className="w-6 h-6 flex items-center justify-center hover:scale-110 transition-transform"
-                  >
-                    <Image src={icon.src} alt={icon.alt} width={24} height={24} />
-                  </a>
-                ))}
-              </div>
+            <div className="flex justify-center space-x-6">
+  {[
+    { src: "/images/Insta.png", alt: "Instagram", href: "https://www.instagram.com/me__digital/" },
+    { src: "/images/Facebook.png", alt: "Facebook", href: "https://www.facebook.com/MediaExpressionDigital/" },
+    { src: "/images/Youtube.png", alt: "YouTube", href: "https://www.youtube.com/@mediaexpressiondigital" }, // optional if you have one
+    { src: "/images/Twitter.png", alt: "Twitter", href: "https://twitter.com" }, // replace if active
+    { src: "/images/Linkedin.PNG", alt: "LinkedIn", href: "https://www.linkedin.com/company/mediaexpressiondigital/posts/?feedView=all" },
+  ].map((social, index) => (
+    <a
+      key={index}
+      href={social.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="w-8 h-8 relative flex items-center justify-center hover:scale-110 transition-transform duration-300"
+    >
+      <Image
+        src={social.src}
+        alt={social.alt}
+        width={32}
+        height={32}
+        className="object-contain"
+      />
+    </a>
+  ))}
+</div>
             </div>
           </div>
 
@@ -1212,7 +1223,7 @@ precision, they evolve into impact — and sometimes, into<br></br>legacies.
 </div>
 
           
-          <div className="w-1/2 relative h-screen flex items-center justify-start translate-x-[-185px]">
+          <div className="w-1/2 relative h-screen flex items-center justify-start translate-x-[-288px] translate-y-[40px]">
   <div className="relative w-[470px] h-screen -mt-20 z-20">
   <Image
     src="/images/laptop-table.png"
@@ -1225,11 +1236,11 @@ precision, they evolve into impact — and sometimes, into<br></br>legacies.
 
     
     {/* Orange line */}
-    <div className="absolute h-[2px] bg-orange-500 w-[1000px] translate-x-[100px] translate-y-[300px]" />
+    <div className="absolute h-[2px] bg-orange-500 w-[1000px] translate-x-[100px] translate-y-[250px]" />
   </div>
 </div>
 
-          <div className="translate-x-[-550px]">
+          <div className="translate-x-[-650px]">
             <div className="translate-y-[80px]">
             <h2 className="text-3xl font-extrabold text-orange-500 mb-1">
             Connect & <br></br>
@@ -1265,7 +1276,7 @@ panache.
             </div>
 
 
-            <div className="translate-x-[-570px]">
+            <div className="translate-x-[-670px]">
             <div className="translate-y-[-15px]">
             <h2 className="text-3xl font-extrabold text-orange-500 mb-1">
             Define <br></br>
@@ -1288,7 +1299,7 @@ and resonates.
             </div>
 
 
-            <div className="translate-x-[-600px]">
+            <div className="translate-x-[-700px]">
             <div className="translate-y-[-25px]">
             <h2 className="text-3xl font-extrabold text-orange-500 mb-1">
             Develop a <br></br>
@@ -1522,55 +1533,46 @@ at captivating and converting on your budget.
             backgroundRepeat: "no-repeat",
           }}
         >
-          {/* Main logo and search */}
+          {/* Main logo  */}
           <div className="flex items-center space-x-6 ">
               <Image
                 src="/images/Logo.png"
                 alt="Logo"
-                width={150}
-                height={40}
-                className="cursor-pointer translate-x-[250px] translate-y-[-100px]"
+                width={300}
+                height={80}
+                className="cursor-pointer translate-x-[0px] translate-y-[-50px]"
               />
             
-            {/* Search bar */}
-            <div className="flex items-center justify-center space-x-4 mb-8 translate-y-[20px]">
-              <input
-                type="text"
-                placeholder="Search for our Services"
-                className="bg-gray-800 text-white px-6 py-3 rounded-lg border border-gray-600 focus:border-orange-500 focus:outline-none w-80"
-              />
-              <button className="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors duration-300 translate-y-[60px] translate-x-[-230px]">
-                Search
-              </button>
-            </div>
+            
           </div>
 
           {/* Bottom logos */}
-          <div className="flex items-center justify-center space-x-8 translate-y-[70px] translate-x-[30px]">
-            {/* Social media icons - replace with your actual icons */}
-            {[
-              
-"/images/Insta.png",
-"/images/Facebook.png", 
-"/images/Youtube.png",
-"/images/Twitter.png",
-"/images/Linkedin.png"
-            ].map((social, index) => (
-              <a
-                key={index}
-                href="#"
-                className="w-10 h-10 relative flex items-center justify-center hover:scale-110 transition-transform duration-300"
-              >
-                <Image
-                  src={social} // Replace with your actual social media icons
-                  alt={`Social Icon ${index + 1}`}
-                  width={40}
-                  height={40}
-                 
-                />
-              </a>
-            ))}
-          </div>
+          <div className="flex items-center justify-center space-x-8 translate-y-[70px] translate-x-[-30px]">
+  {/* Social media icons with correct links */}
+  {[
+    { src: "/images/Insta.png", alt: "Instagram", href: "https://www.instagram.com/me__digital/" },
+    { src: "/images/Facebook.png", alt: "Facebook", href: "https://www.facebook.com/MediaExpressionDigital/" },
+    { src: "/images/Youtube.png", alt: "YouTube", href: "https://www.youtube.com/@mediaexpressiondigital" }, // optional, replace with real link if available
+    { src: "/images/Twitter.png", alt: "Twitter", href: "https://twitter.com" }, // replace if Medigital has an official Twitter/X
+    { src: "/images/Linkedin.png", alt: "LinkedIn", href: "https://www.linkedin.com/company/mediaexpressiondigital/posts/?feedView=all" },
+  ].map((social, index) => (
+    <a
+      key={index}
+      href={social.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="w-10 h-10 relative flex items-center justify-center hover:scale-110 transition-transform duration-300"
+    >
+      <Image
+        src={social.src}
+        alt={social.alt}
+        width={40}
+        height={40}
+        className="object-contain"
+      />
+    </a>
+  ))}
+</div>
         </section>
 
 

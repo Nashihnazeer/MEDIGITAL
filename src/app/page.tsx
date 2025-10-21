@@ -1,10 +1,6 @@
+import { redirect } from "next/navigation";
 
-import HorizontalScrollWebsite from "@/components/HorizontalScrollWebsite";
-
-export default function Home() {
-  return (
-    <main className="overflow-x-hidden overflow-y-auto">
-      <HorizontalScrollWebsite />
-    </main>
-  );
+export default function Root() {
+  redirect("/horizontalscrollwebsite");
+  return null;
 }

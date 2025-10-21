@@ -1,19 +1,23 @@
 // src/components/AnimatedSmiley.tsx
+"use client";
+
 import React, { useEffect, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
+import { motion, useReducedMotion } from "framer-motion";
 
 type SafeImgProps = {
   src?: string;
   alt?: string;
   className?: string;
   style?: React.CSSProperties;
-  width?: number | string;
-  height?: number | string;
-  loading?: "lazy" | "eager" | "auto";
+  width?: number;
+  height?: number;
+  loading?: "lazy" | "eager";
+  decoding?: "async" | "sync" | "auto";
   priority?: boolean;
   fetchPriority?: "auto" | "high" | "low";
-  // decoding, crossOrigin intentionally omitted because next/image manages optimizations.
+  crossOrigin?: "anonymous" | "use-credentials" | "";
+  unoptimized?: boolean;
 };
 
 const AnimatedSmiley: React.FC<SafeImgProps> = ({
@@ -21,23 +25,23 @@ const AnimatedSmiley: React.FC<SafeImgProps> = ({
   alt = "Smiley",
   className = "",
   style,
-  width,
-  height,
-  loading,
-  priority,
+  width = 256,
+  height = 256,
+  loading = "lazy",
+  decoding = "async",
+  priority = false,
   fetchPriority,
+  crossOrigin,
+  unoptimized = true,
 }) => {
   const prefersReducedMotion = useReducedMotion();
-
-  const [isMobile, setIsMobile] = useState<boolean>(() =>
-    typeof window === "undefined" ? false : window.matchMedia("(max-width: 640px)").matches
-  );
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const mq = window.matchMedia("(max-width: 640px)");
-    const onChange = (e: MediaQueryListEvent | MediaQueryList) =>
-      setIsMobile((e as any).matches);
+    const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    setIsMobile(mq.matches);
     if (mq.addEventListener) mq.addEventListener("change", onChange);
     else mq.addListener(onChange as any);
     return () => {
@@ -46,95 +50,94 @@ const AnimatedSmiley: React.FC<SafeImgProps> = ({
     };
   }, []);
 
-  // Animations (same frames you had)
-  const mobileAnimation = {
-    scale: [1, 1.12, 1, 0.97, 1],
-    rotate: [0, 180, 360, 540, 720],
+  /**
+   * Key idea:
+   * - rotate goes through 0 so it never chooses a long rotation path.
+   * - repeatType: "reverse" flips the sequence on each loop -> alternates left-first / right-first.
+   * - transformOrigin centers the pivot.
+   */
+
+  const desktopAnim = {
+    rotate: [0, -120, 0, 120, 0], // center -> left -> center -> right -> center
+    scale: [1, 1.22, 1.04, 1], // zoom in, slight bounce, back
     transition: {
-      duration: 2.2,
-      ease: "easeInOut",
-      repeat: Infinity,
-      repeatType: "loop",
+      duration: 3.6,
+      ease: "easeInOut" as any,
+      repeat: Infinity as any,
+      repeatType: "reverse" as const, // alternate sequence on each repeat
     },
-  } as any;
+  } as const;
 
-  const desktopAnimation = {
-    scale: [1, 1.28, 1, 0.92, 1],
-    rotate: [0, 180, 360, 540, 720],
+  const mobileAnim = {
+    rotate: [0, -120, 0, 120, 0],
+    scale: [1, 1.14, 1.02, 1],
     transition: {
-      duration: 3.5,
-      ease: "easeInOut",
-      repeat: Infinity,
-      repeatType: "loop",
+      duration: 2.6,
+      ease: "easeInOut" as any,
+      repeat: Infinity as any,
+      repeatType: "reverse" as const,
     },
-  } as any;
+  } as const;
 
-  const interactionProps = { whileHover: { scale: 1.08 }, whileTap: { scale: 0.96 } } as const;
-
-  // merged style: keep transform origin so rotation centers
-  const mergedStyle: React.CSSProperties = {
-    height: "auto",
-    maxWidth: "100%",
+  const containerStyle: React.CSSProperties = {
+    width,
+    height,
+    display: "inline-block",
     transformOrigin: "50% 50%",
     ...(style || {}),
   };
 
-  // Helper: render Next Image either with explicit width/height or with fill (relative parent)
-  const renderImage = () => {
-    // If width and height are provided as numbers, use them directly (static sizing)
-    const numericWidth = typeof width === "number" ? width : undefined;
-    const numericHeight = typeof height === "number" ? height : undefined;
-
-    // If both numeric width and height are provided, use fixed sizing Image
-    if (numericWidth && numericHeight) {
-      return (
-        <Image
-          src={src}
-          alt={alt}
-          width={numericWidth}
-          height={numericHeight}
-          style={{ objectFit: "contain", ...mergedStyle }}
-          priority={Boolean(priority)}
-          
-          fetchPriority={fetchPriority}
-          loading={loading === "eager" ? "eager" : "lazy"}
-        />
-      );
-    }
-
-    // Otherwise use fill inside a relative container so Image covers the available area
-    return (
-      <div className={`relative w-full ${height ? "" : "h-auto"}`} style={height ? { height } : undefined}>
-        <Image
-          src={src}
-          alt={alt}
-          fill
-          style={{ objectFit: "cover", ...mergedStyle }}
-          priority={Boolean(priority)}
-          loading={loading === "eager" ? "eager" : "lazy"}
-        />
-      </div>
-    );
+  const imageStyle: React.CSSProperties = {
+    width: "100%",
+    height: "100%",
+    objectFit: "contain",
+    imageRendering: "pixelated",
   };
 
-  // If user prefers reduced motion, render static Image (no motion wrapper)
   if (prefersReducedMotion) {
     return (
-      <div className={`select-none pointer-events-none ${className}`} style={mergedStyle}>
-        {renderImage()}
+      <div style={containerStyle} className={`select-none ${className}`}>
+        <Image
+          src={src}
+          alt={alt}
+          width={width}
+          height={height}
+          loading={loading}
+          decoding={decoding}
+          priority={priority}
+          fetchPriority={fetchPriority as any}
+          crossOrigin={crossOrigin as any}
+          unoptimized={unoptimized}
+          draggable={false}
+          style={imageStyle}
+        />
       </div>
     );
   }
 
-  // Animated: wrap the Image in a motion.div and animate the wrapper
   return (
     <motion.div
-      {...interactionProps}
-      animate={isMobile ? mobileAnimation : desktopAnimation}
+      // small interactive scale on hover/tap
+      whileHover={{ scale: 1.06 }}
+      whileTap={{ scale: 0.96 }}
+      animate={(isMobile ? mobileAnim : desktopAnim) as any} // cast to any for TS
+      style={containerStyle}
       className={`block will-change-transform select-none pointer-events-auto ${className}`}
-      style={mergedStyle}
     >
-      {renderImage()}
+      <Image
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        loading={loading}
+        decoding={decoding}
+        priority={priority}
+        fetchPriority={fetchPriority as any}
+        crossOrigin={crossOrigin as any}
+        unoptimized={unoptimized}
+        draggable={false}
+        style={imageStyle}
+      />
     </motion.div>
   );
 };

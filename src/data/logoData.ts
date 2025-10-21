@@ -1,28 +1,152 @@
 // src/data/logoData.ts
 export type LogoItem = {
   id: string;
-  src: string;   // path under /public/images/
+  src: string; // path under /public/images/
   title: string;
   body: string;
 };
 
 const logoData: LogoItem[] = [
- {
-  id: "c1",
-  src: "/images/11.png",
-  title: "Client One",
-  body: "Chicking is an international fast-food restaurant chain founded in 2000 by A. K. Mansoor in Dubai, United Arab Emirates, and is known for its fried chicken and fully Halal menu. The company has expanded globally to over 23 countries with more than 230 outlets and offers a variety of fast food items, including chicken, burgers, wraps, and sides. Chicking emphasizes freshly prepared food, quality ingredients, and a diverse menu that incorporates global flavors. \n\nCompany and concept\nFounder: A. K. Mansoor\nFounded: 2000 in Dubai, United Arab Emirates\nHeadquarters: Dubai, United Arab Emirates\nBusiness Model: Quick Service Restaurant (QSR) specializing in fried chicken, with a focus on being a fully Halal-certified brand.\n\nMenu and offerings\nCore Products: Fried chicken is their specialty, but the menu also includes burgers, wraps, biryani, and grilled chicken.\nOther items: The menu also features side dishes, desserts, and milkshakes.\nFlavors: The brand uses a secret recipe with herbs and spices from around the world to create its unique flavors.\n\nGlobal presence\nReach: Chicking has a global presence, operating in over 23 countries across continents like Asia, Africa, Europe, and the Americas.\nExpansion: The brand has a significant international footprint, with many locations in the Middle East, Asia, and beyond.\n\nCompany focus\nHalal Compliance: Chicking is known for being one of the first fully Halal-certified fast-food chains.\nQuality: The company emphasizes using high-quality ingredients and freshly prepared food.\nMenu Innovation: Chicking is committed to evolving its menu and has introduced new items like grilled chicken and other options to cater to customer demand.\nStore Atmosphere: The restaurants aim to provide a welcoming and stylish environment for families and customers."
-},
-
-
-
-
-  
-  { id: "c2", src: "/images/22.png", title: "Client Two", body: "Short description for Client Two." },
-  { id: "c3", src: "/images/33.png", title: "Client Three", body: "Short description for Client Three." },
-  { id: "c4", src: "/images/44.png", title: "Client Four", body: "Short description for Client Four." },
-  { id: "c5", src: "/images/55.png", title: "Client Five", body: "Short description for Client Five." },
-  { id: "c6", src: "/images/66.png", title: "Client Six", body: "Short description for Client Six nash." },
+  {
+    id: "c01",
+    src: "/images/Variant2-1.png",
+    title: "Teens Lifestyle",
+    body:
+      "Teens Lifestyle is a youth-focused apparel label. Medigital supported Teens Lifestyle with responsive e-commerce design, product photography coordination, and a social-first digital marketing strategy aimed at driving direct-to-consumer sales and growing social engagement among younger audiences.",
+  },
+  {
+    id: "c02",
+    src: "/images/Variant2-2.png",
+    title: "Valath Jewellers",
+    body:
+      "Valath Jewellers is a traditional jewellery retailer. Medigital collaborated on a brand refresh, high-conversion product pages, SEO for local searches, and visual merchandising templates for in-store and digital campaigns to improve discoverability and online enquiries.",
+  },
+  {
+    id: "c03",
+    src: "/images/Variant2-3.png",
+    title: "Fruitomans",
+    body:
+      "Fruitomans operates in food packaging and distribution. Medigital delivered a modern brochure website, packaging artwork guidance, and B2B lead generation campaigns using targeted search and display ads to help increase distributor enquiries and trade partnerships.",
+  },
+  {
+    id: "c04",
+    src: "/images/Variant2-4.png",
+    title: "NeckFlix",
+    body:
+      "NeckFlix is a niche lifestyle/accessory brand. Medigital provided product catalogue UI/UX, conversion-optimised landing pages, and multi-channel campaigns (paid social + email) to raise product awareness and improve online conversion rates.",
+  },
+  {
+    id: "c05",
+    src: "/images/Variant2-5.png",
+    title: "N'Style Home Wear",
+    body:
+      "N'Style Home Wear focuses on comfortable home clothing and linens. Medigital implemented an e-commerce platform with improved product filtering, lifestyle photography direction, CRO experiments, and influencer-led social campaigns to boost seasonal sales.",
+  },
+  {
+    id: "c06",
+    src: "/images/Variant2-6.png",
+    title: "Bhima & Brothers",
+    body:
+      "Bhima & Brothers is an established retail brand. Medigital worked on omni-channel design — integrating POS creative, hero product pages and local SEO — and rolled out targeted promotions to increase footfall and online enquiries.",
+  },
+  {
+    id: "c07",
+    src: "/images/Variant2-7.png",
+    title: "Odyssia",
+    body:
+      "Odyssia is a lifestyle and leisure brand. Medigital supported Odyssia with brand identity assets, campaign microsites, and data-driven paid campaigns focused on driving lead generation and enhancing brand recall across regional markets.",
+  },
+  {
+    id: "c08",
+    src: "/images/Variant2-8.png",
+    title: "Richmax Tours & Travels",
+    body:
+      "Richmax Tours & Travels is a travel services provider. Medigital created a mobile-first booking funnel, email automation for leads, and performance marketing programs to capture seasonal bookings and travel enquiries.",
+  },
+  {
+    id: "c09",
+    src: "/images/Variant2-9.png",
+    title: "Popees Baby Care",
+    body:
+      "Popees is a baby care products brand. Medigital supported product landing pages, on-site UX for parents (quick cart + subscription flows), ASO guidance for product apps, and family-focused campaign creative for social channels.",
+  },
+  {
+    id: "c10",
+    src: "/images/Variant2-10.png",
+    title: "Euro Guard",
+    body:
+      "Euro Guard supplies UPVC and rainwater solutions. Medigital delivered an industry website with product configurators, downloadable spec sheets, and a targeted LinkedIn & search campaign to reach architects, contractors and trade buyers.",
+  },
+  {
+    id: "c11",
+    src: "/images/Variant2-11.png",
+    title: "Kairali TMT",
+    body:
+      "Kairali TMT manufactures steel reinforcement bars. Medigital provided corporate website modernization, technical datasheet layout, dealer portal UX recommendations, and targeted trade marketing assets to support channel partners.",
+  },
+  {
+    id: "c12",
+    src: "/images/Variant2-12.png",
+    title: "EatToFresh",
+    body:
+      "EatToFresh produces ready-to-eat and fresh food solutions. Medigital designed a direct-to-consumer storefront, set up subscription ordering flows, and ran performance ads and conversion optimisation to lift orders and repeat purchase rates.",
+  },
+  {
+    id: "c13",
+    src: "/images/Variant2-13.png",
+    title: "Swayamvara Silks",
+    body:
+      "Swayamvara Silks is a premium textile & saree retailer. Medigital created a luxury-focused product gallery, curated content for seasonal campaigns, and an email lifecycle program aimed at VIP customers and festival season conversions.",
+  },
+  {
+    id: "c14",
+    src: "/images/Variant2-14.png",
+    title: "Jayalakshmi",
+    body:
+      "Jayalakshmi is a heritage apparel and retail brand. Medigital worked on digital catalogues, UX improvements for product discovery, and POS creative that matches the in-store branding to provide a cohesive customer experience.",
+  },
+  {
+    id: "c15",
+    src: "/images/Variant2-15.png",
+    title: "Chicking",
+    body:
+      "Chicking is an international quick-service restaurant brand. Medigital provided menu micro-site design, promotional campaign creative, and social & local ads execution to increase delivery and dine-in orders during key promotional windows.",
+  },
+  {
+    id: "c16",
+    src: "/images/Variant2-16.png",
+    title: "KSFE",
+    body:
+      "KSFE (Kerala State Financial Enterprises) is a financial services organisation. Medigital helped produce secure informational web pages, customer education content, and accessibility-focused UX patterns to improve citizen engagement and clarity of services.",
+  },
+  {
+    id: "c17",
+    src: "/images/Variant2-17.png",
+    title: "Swarnam Jewellery",
+    body:
+      "Swarnam Jewellery specialises in traditional jewellery collections. Medigital supported Swarnam with product storytelling, high-resolution imagery handling, campaign landing pages for festive seasons, and CRM-driven retention programs.",
+  },
+  {
+    id: "c18",
+    src: "/images/Variant2-18.png",
+    title: "Mercely’s Ice Cream",
+    body:
+      "Mercely’s is an ice cream & dessert brand. Medigital designed seasonal promotional campaigns, POS creatives for in-store displays, and social media content to amplify new flavour launches and retail distribution announcements.",
+  },
+  {
+    id: "c19",
+    src: "/images/Variant2-19.png",
+    title: "Suntips",
+    body:
+      "Suntips is a premium beverage/tea brand. Medigital created product landing pages, packaging mockups for e-commerce display, and influencer-driven sampling campaigns to boost trial and brand awareness in the target market.",
+  },
+  {
+    id: "c20",
+    src: "/images/Variant2-20.png",
+    title: "Teens (alternate) / Brand Suite",
+    body:
+      "A compact visual identity used across youth & lifestyle properties. Medigital produced a brand suite and templated creative that helps multiple sub-brands maintain a consistent design language across web and retail touchpoints.",
+  },
 ];
 
 export default logoData;

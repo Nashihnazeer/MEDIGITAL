@@ -75,28 +75,34 @@ const services: ServiceItem[] = [
 
   // Mobile detection
   // Mobile detection (handles landscape too)
-useEffect(() => {
-  const checkMobile = () => {
-    const ua = navigator.userAgent || navigator.vendor || (window as any).opera;
-
-    // Check userAgent for mobile/tablet keywords
-    const isTabletOrMobileUA =
-      /iPad|iPhone|iPod|Android|Tablet|PlayBook|Silk/i.test(ua);
-
-    // Also check screen size (important for iPadOS & Android tablets in "desktop mode")
-    const isSmallScreen = window.innerWidth <= 1366 && window.innerHeight <= 1024;
-
-    // Final decision → true if UA says mobile/tablet OR screen size is within tablet range
-    const shouldUseMobileLayout = isTabletOrMobileUA || isSmallScreen;
-
-    setIsMobile(shouldUseMobileLayout);
-  };
-
-  checkMobile();
-  window.addEventListener("resize", checkMobile);
-  return () => window.removeEventListener("resize", checkMobile);
-}, []);
-
+  useEffect(() => {
+    const checkMobile = () => {
+      const ua = navigator.userAgent || navigator.vendor || (window as any).opera;
+  
+      // Detect iPads, iPhones, Android devices (including newer iPadOS Safari that reports as Mac)
+      const isTabletOrMobileUA = /iPhone|iPod|Android|Mobile|iPad|Tablet|PlayBook|Silk/i.test(ua);
+  
+      // Screen-based check — only small widths (not short desktop windows)
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+  
+      // iPads (portrait ≤768–1024) and all mobiles (≤480)
+      const isSmallScreen = width <= 1024 && height <= 1366;
+  
+      // Avoid false positives on desktop by checking for "Mac" without "iPad"
+      const isDesktopMac = /Macintosh/i.test(ua) && !/iPad/i.test(ua);
+  
+      // Final decision
+      const shouldUseMobileLayout = !isDesktopMac && (isTabletOrMobileUA || isSmallScreen);
+  
+      setIsMobile(shouldUseMobileLayout);
+    };
+  
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+  
 
 
 
@@ -1102,7 +1108,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
             </h2>
           </div>
 
-          <div className="relative flex flex-col items-center text-center text-white mt-20 translate-y-[100px]">
+          <div className="relative flex flex-col items-center text-center text-white mt-20 translate-y-[50px]">
   {/* === Headings row === */}
   <div className="grid grid-cols-3 gap-12 w-full max-w-5xl mb-3">
     <div>
@@ -1203,16 +1209,16 @@ precision, they evolve into impact — and sometimes, into<br></br>legacies.
 
         {/* Section 5 - Design Process */}
         <section className="w-screen h-screen relative flex items-center justify-between bg-white px-10">
-          <div className="flex items-center justify-start w-full translate-y-[-250px] sm:translate-x-[750px]">
+          <div className="flex items-center justify-start w-full translate-y-[-200px] sm:translate-x-[750px]">
   {/* Big number 4 */}
-  <div className="text-[180px] font-extrabold text-orange-500 leading-none flex-shrink-0">
+  <div className="text-[150px] font-extrabold text-orange-500 leading-none flex-shrink-0">
     4
   </div>
 
   {/* Text block (aligned perfectly with the height of 4) */}
-  <div className="ml-4 flex flex-col justify-center h-[180px] leading-none">
-    <h2 className="text-[80px] font-extrabold text-orange-500">Daring</h2>
-    <h2 className="text-[80px] font-extrabold text-orange-500">Steps.</h2>
+  <div className="ml-4 flex flex-col justify-center h-[150px] leading-none">
+    <h2 className="text-[50px] font-extrabold text-orange-500">Daring</h2>
+    <h2 className="text-[50px] font-extrabold text-orange-500">Steps.</h2>
 
     {/* Subtext below */}
     <p className="text-black text-sm leading-relaxed mt-2">
@@ -1223,7 +1229,7 @@ precision, they evolve into impact — and sometimes, into<br></br>legacies.
 </div>
 
           
-          <div className="w-1/2 relative h-screen flex items-center justify-start translate-x-[-288px] translate-y-[40px]">
+          <div className="w-1/2 relative h-screen flex items-center justify-start translate-x-[-169px] translate-y-[40px]">
   <div className="relative w-[470px] h-screen -mt-20 z-20">
   <Image
     src="/images/laptop-table.png"
@@ -1236,11 +1242,11 @@ precision, they evolve into impact — and sometimes, into<br></br>legacies.
 
     
     {/* Orange line */}
-    <div className="absolute h-[2px] bg-orange-500 w-[1000px] translate-x-[100px] translate-y-[250px]" />
+    <div className="absolute h-[2px] bg-orange-500 w-[1000px] translate-x-[100px] translate-y-[200px]" />
   </div>
 </div>
 
-          <div className="translate-x-[-650px]">
+          <div className="translate-x-[-530px]">
             <div className="translate-y-[80px]">
             <h2 className="text-3xl font-extrabold text-orange-500 mb-1">
             Connect & <br></br>
@@ -1257,7 +1263,7 @@ something amazing.
 
 
 
-            <div className="translate-y-[150px]">
+            <div className="translate-y-[120px]">
             <h2 className="text-3xl font-extrabold text-orange-500 mb-1">
             Make It <br></br>
 Happen
@@ -1276,7 +1282,7 @@ panache.
             </div>
 
 
-            <div className="translate-x-[-670px]">
+            <div className="translate-x-[-550px]">
             <div className="translate-y-[-15px]">
             <h2 className="text-3xl font-extrabold text-orange-500 mb-1">
             Define <br></br>
@@ -1299,7 +1305,7 @@ and resonates.
             </div>
 
 
-            <div className="translate-x-[-700px]">
+            <div className="translate-x-[-620px]">
             <div className="translate-y-[-25px]">
             <h2 className="text-3xl font-extrabold text-orange-500 mb-1">
             Develop a <br></br>
@@ -1314,7 +1320,7 @@ at captivating and converting on your budget.
             </div>
             
             </div>
-            <div className="absolute bottom-[100px] right-[200px] z-20">
+            <div className="absolute bottom-[0px] right-[200px] z-20">
         <Image
           src="/images/daringsteps.png"
           alt="Daring Steps"

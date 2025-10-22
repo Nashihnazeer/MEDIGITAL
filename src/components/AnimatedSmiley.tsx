@@ -31,7 +31,7 @@ const AnimatedSmiley: React.FC<SafeImgProps> = ({
   priority = false,
   fetchPriority,
   crossOrigin,
-  unoptimized = true,
+  unoptimized = false, // default to optimized delivery for high quality
 }) => {
   const prefersReducedMotion = useReducedMotion();
   const [isMobile, setIsMobile] = useState(false);
@@ -49,14 +49,14 @@ const AnimatedSmiley: React.FC<SafeImgProps> = ({
     };
   }, []);
 
-  // 💓 Heartbeat animation — zoom in/out
+  // Subtle heartbeat: much smaller scale and slower to avoid pixelation
   const heartbeatAnim = {
-    scale: [1, 1.18, 1, 1.12, 1],
+    scale: [1, 1.08, 1, 1.04, 1], // reduced amplitude
     transition: {
-      duration: isMobile ? 1.6 : 2.2,
+      duration: isMobile ? 2.0 : 3.0, // slightly slower for smoother rendering
       ease: "easeInOut" as any,
       repeat: Infinity as any,
-      repeatType: "loop" as const,
+      repeatType: "reverse" as const,
     },
   };
 
@@ -72,7 +72,11 @@ const AnimatedSmiley: React.FC<SafeImgProps> = ({
     width: "100%",
     height: "100%",
     objectFit: "contain",
-    imageRendering: "pixelated",
+    imageRendering: "auto", // important: don't force pixelated rendering
+    backfaceVisibility: "hidden",
+    willChange: "transform",
+    transformOrigin: "50% 50%",
+    display: "block",
   };
 
   if (prefersReducedMotion) {
@@ -89,6 +93,8 @@ const AnimatedSmiley: React.FC<SafeImgProps> = ({
           fetchPriority={fetchPriority as any}
           crossOrigin={crossOrigin as any}
           unoptimized={unoptimized}
+          quality={100}               // request highest quality
+          sizes={`${width}px`}        // help next/image select the best source
           draggable={false}
           style={imageStyle}
         />
@@ -98,8 +104,8 @@ const AnimatedSmiley: React.FC<SafeImgProps> = ({
 
   return (
     <motion.div
-      whileHover={{ scale: 1.06 }}
-      whileTap={{ scale: 0.96 }}
+      whileHover={{ scale: 1.03 }}
+      whileTap={{ scale: 0.98 }}
       animate={heartbeatAnim as any}
       style={containerStyle}
       className={`block will-change-transform select-none pointer-events-auto ${className}`}
@@ -115,6 +121,8 @@ const AnimatedSmiley: React.FC<SafeImgProps> = ({
         fetchPriority={fetchPriority as any}
         crossOrigin={crossOrigin as any}
         unoptimized={unoptimized}
+        quality={100}               // highest quality
+        sizes={`${width}px`}
         draggable={false}
         style={imageStyle}
       />

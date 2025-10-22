@@ -5,6 +5,7 @@ import { ChevronDown } from "lucide-react";
 import AnimatedSmiley from "@/components/AnimatedSmiley";
 import ServicePillList, { ServiceItem } from "@/components/Servicelist";
 import logoData, { type LogoItem } from "@/data/logoData";
+import Link from "next/link";
 
 
 
@@ -58,6 +59,88 @@ const services: ServiceItem[] = [
     logoScrollRef.current.scrollBy({ left: 240, behavior: "smooth" });
   };
   // --------------------------------------------------------------------
+  
+  
+
+// REPLACE current handleNavClick with this
+const handleNavClick = (e: React.MouseEvent, href: string) => {
+  // allow /blog normally
+  if (href === "/blog") return;
+
+  if (!href.startsWith("#")) {
+    e.preventDefault();
+    return;
+  }
+  e.preventDefault();
+
+  const selector = href; // "#ServicesDesktop", "#portfoliodesktop", "#reachusdesktop", etc.
+  const el = document.querySelector(selector) as HTMLElement | null;
+  if (!el) {
+    console.warn("Target not found:", selector);
+    return;
+  }
+
+  // fallback simple scroll if sizes unknown
+  if (!viewportWidth || !viewportHeight) {
+    const topSimple = el.getBoundingClientRect().top + window.pageYOffset;
+    window.scrollTo({ top: Math.max(0, Math.floor(topSimple)), behavior: "smooth" });
+    return;
+  }
+
+  // horizontal layout math (same as your scroll handler)
+  const horizontalScrollDistance = (viewportWidth * 3) - viewportWidth; // 2 * vw
+  const bufferZone = viewportHeight * 0.8;
+  const transitionZone = viewportHeight * 1.2;
+
+  const horizontalEnd = horizontalScrollDistance;
+  const bufferEnd = horizontalEnd + bufferZone;
+  const transitionEnd = bufferEnd + transitionZone;
+
+  // 1) If element is inside the horizontal container (containerRef) -> compute offsetLeft
+  const horizContainer = containerRef.current;
+  if (horizContainer && horizContainer.contains(el)) {
+    // element's left offset relative to the container
+    // prefer getBoundingClientRect difference for robustness
+    const elRect = el.getBoundingClientRect();
+    const contRect = horizContainer.getBoundingClientRect();
+    const offsetLeftInside = Math.round(elRect.left - contRect.left + (horizContainer.scrollLeft || 0));
+
+    // In your layout y maps to translateX, so targetY should equal offsetLeftInside
+    let targetY = offsetLeftInside;
+
+    // Clamp and scroll
+    const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    const finalY = Math.min(Math.max(0, targetY), maxScroll);
+    window.scrollTo({ top: finalY, behavior: "smooth" });
+    return;
+  }
+
+  // 2) If element is inside verticalSectionsRef (vertical area), compute transitionEnd + offsetTop
+  const verticalContainer = verticalSectionsRef.current;
+  if (verticalContainer && verticalContainer.contains(el)) {
+    // offset relative to vertical container top
+    const offsetInsideVertical = Math.round(el.getBoundingClientRect().top - verticalContainer.getBoundingClientRect().top + (verticalContainer.scrollTop || 0));
+    let targetY = transitionEnd + offsetInsideVertical;
+    const headerOffset = 0;
+    targetY = Math.max(0, Math.floor(targetY - headerOffset));
+    const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    const finalY = Math.min(targetY, maxScroll);
+    window.scrollTo({ top: finalY, behavior: "smooth" });
+    return;
+  }
+
+  // 3) Fallback: regular anchor (outside both containers)
+  const top = el.getBoundingClientRect().top + window.pageYOffset;
+  const headerOffset = 0;
+  const desired = Math.max(0, Math.floor(top - headerOffset));
+  const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+  const finalTop = Math.min(desired, maxScroll);
+  window.scrollTo({ top: finalTop, behavior: "smooth" });
+};
+
+
+
+
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -838,7 +921,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     { src: "/images/Facebook.png", alt: "Facebook", href: "https://www.facebook.com/MediaExpressionDigital/" },
     { src: "/images/Youtube.png", alt: "YouTube", href: "https://www.youtube.com/@mediaexpressiondigital" }, // optional if you have one
     { src: "/images/Twitter.png", alt: "Twitter", href: "https://twitter.com" }, // replace if active
-    { src: "/images/Linkedin.PNG", alt: "LinkedIn", href: "https://www.linkedin.com/company/mediaexpressiondigital/posts/?feedView=all" },
+    { src: "/images/Linkedin.png", alt: "LinkedIn", href: "https://www.linkedin.com/company/mediaexpressiondigital/posts/?feedView=all" },
   ].map((social, index) => (
     <a
       key={index}
@@ -864,112 +947,37 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 <div className="flex flex-1 px-10 items-center justify-between">
   {/* Left Navigation Menu - Vertical Words */}
   <div className="flex flex-col items-center relative">
-    <ul className="flex flex-col items-center space-y-[80px]">
-      {[
-        { label: "ABOUT US", href: "#aboutus" },
-        { label: "SERVICES", href: "#services" },
-        { label: "PORTFOLIO", href: "#portfolio" },
-        { label: "BLOG", href: "/blog" }, // ✅ Updated: blog will now open /blog page
-        { label: "REACH US", href: "#reachusdesktop" },
-      ].map((item, idx) => (
-        <li
-          key={idx}
-          className="text-gray-200 font-medium text-[9px] hover:text-orange-400 transition-colors duration-300"
-          style={{
-            transform: "rotate(-90deg)",
-            transformOrigin: "center",
-            whiteSpace: "nowrap",
-          }}
+  <ul className="flex flex-col items-center space-y-[80px]">
+  {[
+    { label: "ABOUT US", href: "#ourwaydesktop" },
+    { label: "SERVICES", href: "#ServicesDesktop" },
+    { label: "PORTFOLIO", href: "#portfoliodesktop" },
+    { label: "BLOG", href: "/blog" },
+    { label: "REACH US", href: "#reachusdesktop" },
+  ].map((item) => (
+    <li
+      key={item.href} // USE a stable unique key (href is unique here)
+      className="text-gray-200 font-medium text-[9px] hover:text-orange-400 transition-colors duration-300"
+    >
+      {item.href === "/blog" ? (
+        // New Link API — no legacyBehavior; pass className directly to Link
+        <Link href="/blog" className="inline-block transform -rotate-90 whitespace-nowrap cursor-pointer hover:text-orange-400 transition-colors duration-300 px-1">
+          {item.label}
+        </Link>
+      ) : (
+        <a
+          href={item.href}
+          onClick={(e) => handleNavClick(e, item.href)}
+          className="inline-block transform -rotate-90 whitespace-nowrap cursor-pointer hover:text-orange-400 transition-colors duration-300 px-1"
         >
-          <a
-            href={item.href}
-            className="cursor-pointer"
-            onClick={(e) => {
-              // ✅ Allow /blog to navigate normally
-              if (item.href === "/blog") return; // <--- Let Next.js handle navigation
-              
-              // Otherwise, handle smooth scrolling for anchors
-              e.preventDefault();
-              const id = item.href.replace(/^#/, "");
-              const el = document.getElementById(id);
-              if (!el) {
-                console.warn("Target not found:", id);
-                return;
-              }
+          {item.label}
+        </a>
+      )}
+    </li>
+  ))}
+</ul>
 
-              const rect0 = el.getBoundingClientRect();
-              const absoluteTopBefore = rect0.top + window.pageYOffset;
 
-              const getScrollParents = (node: HTMLElement | null): HTMLElement[] => {
-                const parents: HTMLElement[] = [];
-                let p = node?.parentElement || null;
-                while (p) {
-                  const style = getComputedStyle(p);
-                  const overflowY = style.overflowY;
-                  const isScrollable =
-                    /(auto|scroll|overlay)/.test(overflowY) &&
-                    p.scrollHeight > p.clientHeight;
-                  if (isScrollable) parents.push(p);
-                  p = p.parentElement;
-                }
-                return parents;
-              };
-
-              const wait = (ms: number) =>
-                new Promise((res) => setTimeout(res, ms));
-
-              (async () => {
-                try {
-                  el.scrollIntoView({
-                    behavior: "smooth",
-                    block: "start",
-                    inline: "nearest",
-                  });
-                } catch {}
-
-                const parents = getScrollParents(el);
-                for (let i = 0; i < parents.length; i++) {
-                  const parent = parents[i];
-                  const parentRect = parent.getBoundingClientRect();
-                  const elRect = el.getBoundingClientRect();
-                  const offset =
-                    elRect.top - parentRect.top + (parent.scrollTop || 0);
-                  const maxScroll =
-                    parent.scrollHeight - parent.clientHeight;
-                  const target = Math.min(
-                    Math.max(0, offset),
-                    Math.max(0, maxScroll)
-                  );
-                  try {
-                    parent.scrollTo({ top: target, behavior: "smooth" });
-                  } catch {
-                    parent.scrollTop = target;
-                  }
-                  await wait(160);
-                }
-
-                const finalRect = el.getBoundingClientRect();
-                const isVisible =
-                  finalRect.top >= 0 && finalRect.top < window.innerHeight;
-                if (isVisible) return;
-
-                const headerOffset = 0;
-                const desired = Math.max(0, absoluteTopBefore - headerOffset);
-                const maxScroll =
-                  document.documentElement.scrollHeight - window.innerHeight;
-                const finalTarget = Math.min(
-                  desired,
-                  Math.max(0, maxScroll)
-                );
-                window.scrollTo({ top: finalTarget, behavior: "smooth" });
-              })();
-            }}
-          >
-            {item.label}
-          </a>
-        </li>
-      ))}
-    </ul>
 
     <div className="absolute right-[-30px] top-[-50px] h-[480px] w-[2px] bg-gray-500"></div>
   </div>
@@ -1055,7 +1063,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         </section>
 
         {/* Section 3 - Services */}
-        <section className="w-screen h-screen flex justify-between items-center px-10 bg-gray-200">
+        <section id="ServicesDesktop"  className="w-screen h-screen flex justify-between items-center px-10 bg-gray-200">
         <div className="p-6 max-w-xl mx-auto translate-x-[700px] w-[400px]">
       <ServicePillList
   items={services}
@@ -1069,12 +1077,12 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
             <h2 className="text-7xl font-extrabold text-black mb-4">
               Need a <br />digital<br /> marketing<br /> partner?
             </h2>
-            <div style={{ width: "60%", height: "2px", backgroundColor: "black" }}></div>
-            <p className="text-gray-600 max-w-lg  ml-auto text-left -translate-x-[180px] translate-y-[-0px] text-[15px] my-5 py-2">
+            <div style={{ width: "70%", height: "2px", backgroundColor: "black" }}></div>
+            <p className="text-gray-600 max-w-lg  ml-auto text-left -translate-x-[90px] translate-y-[-0px] text-[15px] my-5 py-2">
               Marketing doesn&apos;t have to be complicated. With us, it&apos;s<br /> smart,
               simple, and effective. Let&apos;s get started.
             </p>
-            <div style={{ width: "60%", height: "2px", backgroundColor: "black" }}></div>
+            <div style={{ width: "70%", height: "2px", backgroundColor: "black" }}></div>
           </div>
         </section>
       </div>
@@ -1093,7 +1101,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         }}
       >
         {/* Section 4 - Digital Marketing */}
-        <section
+        <section id="ourwaydesktop"
           className="w-screen h-screen relative flex flex-col justify-center items-center bg-black text-white"
           style={{
             backgroundImage: "url('/images/digital-marketing.png')",
@@ -1332,7 +1340,7 @@ at captivating and converting on your budget.
         </section>
 
 {/* Section 6 - Portfolio */}
-<section className="w-screen h-screen relative flex items-center justify-between bg-gray-300 ">
+<section id="portfoliodesktop" className="w-screen h-screen relative flex items-center justify-between bg-gray-300 ">
   {/* Left side - Rectangle image */}
   <div className="w-1/2 relative h-screen flex items-center justify-start translate-x-[155px]">
     <div className="w-[470px] h-screen relative">

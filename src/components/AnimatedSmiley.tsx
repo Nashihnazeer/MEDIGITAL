@@ -1,4 +1,3 @@
-// src/components/AnimatedSmiley.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -50,34 +49,16 @@ const AnimatedSmiley: React.FC<SafeImgProps> = ({
     };
   }, []);
 
-  /**
-   * Key idea:
-   * - rotate goes through 0 so it never chooses a long rotation path.
-   * - repeatType: "reverse" flips the sequence on each loop -> alternates left-first / right-first.
-   * - transformOrigin centers the pivot.
-   */
-
-  const desktopAnim = {
-    rotate: [0, -120, 0, 120, 0], // center -> left -> center -> right -> center
-    scale: [1, 1.22, 1.04, 1], // zoom in, slight bounce, back
+  // 💓 Heartbeat animation — zoom in/out
+  const heartbeatAnim = {
+    scale: [1, 1.18, 1, 1.12, 1],
     transition: {
-      duration: 3.6,
+      duration: isMobile ? 1.6 : 2.2,
       ease: "easeInOut" as any,
       repeat: Infinity as any,
-      repeatType: "reverse" as const, // alternate sequence on each repeat
+      repeatType: "loop" as const,
     },
-  } as const;
-
-  const mobileAnim = {
-    rotate: [0, -120, 0, 120, 0],
-    scale: [1, 1.14, 1.02, 1],
-    transition: {
-      duration: 2.6,
-      ease: "easeInOut" as any,
-      repeat: Infinity as any,
-      repeatType: "reverse" as const,
-    },
-  } as const;
+  };
 
   const containerStyle: React.CSSProperties = {
     width,
@@ -117,10 +98,9 @@ const AnimatedSmiley: React.FC<SafeImgProps> = ({
 
   return (
     <motion.div
-      // small interactive scale on hover/tap
       whileHover={{ scale: 1.06 }}
       whileTap={{ scale: 0.96 }}
-      animate={(isMobile ? mobileAnim : desktopAnim) as any} // cast to any for TS
+      animate={heartbeatAnim as any}
       style={containerStyle}
       className={`block will-change-transform select-none pointer-events-auto ${className}`}
     >

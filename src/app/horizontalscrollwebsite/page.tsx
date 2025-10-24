@@ -63,81 +63,122 @@ const services: ServiceItem[] = [
   
 
 // REPLACE current handleNavClick with this
+// --- REPLACE existing handleNavClick with this improved version ---
 const handleNavClick = (e: React.MouseEvent, href: string) => {
-  // allow /blog normally
+  // allow /blog (or other full routes) to behave normally
   if (href === "/blog") return;
 
+  // only handle hash anchors here
   if (!href.startsWith("#")) {
     e.preventDefault();
     return;
   }
   e.preventDefault();
 
-  const selector = href; // "#ServicesDesktop", "#portfoliodesktop", "#reachusdesktop", etc.
-  const el = document.querySelector(selector) as HTMLElement | null;
-  if (!el) {
-    console.warn("Target not found:", selector);
-    return;
-  }
+  try {
+    const selector = href; // e.g. "#ServicesDesktop"
+    const el = document.querySelector(selector) as HTMLElement | null;
+    if (!el) {
+      console.warn("Target not found:", selector);
+      return;
+    }
 
-  // fallback simple scroll if sizes unknown
-  if (!viewportWidth || !viewportHeight) {
-    const topSimple = el.getBoundingClientRect().top + window.pageYOffset;
-    window.scrollTo({ top: Math.max(0, Math.floor(topSimple)), behavior: "smooth" });
-    return;
-  }
+    // If viewport sizes not computed yet, fallback to simple scrolling
+    if (!viewportWidth || !viewportHeight) {
+      const topSimple = el.getBoundingClientRect().top + window.pageYOffset;
+      window.scrollTo({ top: Math.max(0, Math.floor(topSimple)), behavior: "smooth" });
+      // accessibility: focus the element after short delay
+      setTimeout(() => {
+        try {
+          el.setAttribute("tabindex", "-1");
+          el.focus({ preventScroll: true });
+        } catch {}
+      }, 350);
+      return;
+    }
 
-  // horizontal layout math (same as your scroll handler)
-  const horizontalScrollDistance = (viewportWidth * 3) - viewportWidth; // 2 * vw
-  const bufferZone = viewportHeight * 0.8;
-  const transitionZone = viewportHeight * 1.2;
+    // Recreate the same geometry used by your scroll handler
+    const horizontalScrollDistance = (viewportWidth * 3) - viewportWidth; // 2 * vw
+    const bufferZone = viewportHeight * 0.8;
+    const transitionZone = viewportHeight * 1.2;
 
-  const horizontalEnd = horizontalScrollDistance;
-  const bufferEnd = horizontalEnd + bufferZone;
-  const transitionEnd = bufferEnd + transitionZone;
+    const horizontalEnd = horizontalScrollDistance;
+    const bufferEnd = horizontalEnd + bufferZone;
+    const transitionEnd = bufferEnd + transitionZone;
 
-  // 1) If element is inside the horizontal container (containerRef) -> compute offsetLeft
-  const horizContainer = containerRef.current;
-  if (horizContainer && horizContainer.contains(el)) {
-    // element's left offset relative to the container
-    // prefer getBoundingClientRect difference for robustness
-    const elRect = el.getBoundingClientRect();
-    const contRect = horizContainer.getBoundingClientRect();
-    const offsetLeftInside = Math.round(elRect.left - contRect.left + (horizContainer.scrollLeft || 0));
+    // 1) If element lives inside the horizontal container -> compute offsetLeft and map to page Y
+    const horizContainer = containerRef.current;
+    if (horizContainer && horizContainer.contains(el)) {
+      // Use bounding rects to compute robust left offset
+      const elRect = el.getBoundingClientRect();
+      const contRect = horizContainer.getBoundingClientRect();
 
-    // In your layout y maps to translateX, so targetY should equal offsetLeftInside
-    let targetY = offsetLeftInside;
+      // offsetLeftInside = how far (px) the element is from the left edge of the horizontal container
+      const offsetLeftInside = Math.round(elRect.left - contRect.left + (horizContainer.scrollLeft || 0));
 
-    // Clamp and scroll
-    const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-    const finalY = Math.min(Math.max(0, targetY), maxScroll);
-    window.scrollTo({ top: finalY, behavior: "smooth" });
-    return;
-  }
+      // In your layout the page Y for horizontal sections equals the horizontal X offset (identity mapping)
+      let targetY = offsetLeftInside;
 
-  // 2) If element is inside verticalSectionsRef (vertical area), compute transitionEnd + offsetTop
-  const verticalContainer = verticalSectionsRef.current;
-  if (verticalContainer && verticalContainer.contains(el)) {
-    // offset relative to vertical container top
-    const offsetInsideVertical = Math.round(el.getBoundingClientRect().top - verticalContainer.getBoundingClientRect().top + (verticalContainer.scrollTop || 0));
-    let targetY = transitionEnd + offsetInsideVertical;
+      // Clamp to document bounds and scroll
+      const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      const finalY = Math.min(Math.max(0, targetY), maxScroll);
+      window.scrollTo({ top: finalY, behavior: "smooth" });
+
+      // accessibility focus after scroll
+      setTimeout(() => {
+        try {
+          el.setAttribute("tabindex", "-1");
+          el.focus({ preventScroll: true });
+        } catch {}
+      }, 450);
+
+      return;
+    }
+
+    // 2) If element is inside the verticalSectionsRef -> compute transitionEnd + offsetTop
+    const verticalContainer = verticalSectionsRef.current;
+    if (verticalContainer && verticalContainer.contains(el)) {
+      const offsetInsideVertical = Math.round(
+        el.getBoundingClientRect().top - verticalContainer.getBoundingClientRect().top + (verticalContainer.scrollTop || 0)
+      );
+
+      const headerOffset = 0; // set if you have a fixed header
+      let targetY = Math.max(0, Math.floor(transitionEnd + offsetInsideVertical - headerOffset));
+
+      const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      const finalY = Math.min(targetY, maxScroll);
+
+      window.scrollTo({ top: finalY, behavior: "smooth" });
+
+      setTimeout(() => {
+        try {
+          el.setAttribute("tabindex", "-1");
+          el.focus({ preventScroll: true });
+        } catch {}
+      }, 450);
+
+      return;
+    }
+
+    // 3) Fallback: normal anchor (outside both special containers)
+    const top = el.getBoundingClientRect().top + window.pageYOffset;
     const headerOffset = 0;
-    targetY = Math.max(0, Math.floor(targetY - headerOffset));
+    const desired = Math.max(0, Math.floor(top - headerOffset));
     const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-    const finalY = Math.min(targetY, maxScroll);
-    window.scrollTo({ top: finalY, behavior: "smooth" });
-    return;
+    const finalTop = Math.min(desired, maxScroll);
+    window.scrollTo({ top: finalTop, behavior: "smooth" });
+
+    setTimeout(() => {
+      try {
+        el.setAttribute("tabindex", "-1");
+        el.focus({ preventScroll: true });
+      } catch {}
+    }, 350);
+  } catch (err) {
+    console.error("handleNavClick error:", err);
   }
-
-  // 3) Fallback: regular anchor (outside both containers)
-  const top = el.getBoundingClientRect().top + window.pageYOffset;
-  const headerOffset = 0;
-  const desired = Math.max(0, Math.floor(top - headerOffset));
-  const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-  const finalTop = Math.min(desired, maxScroll);
-  window.scrollTo({ top: finalTop, behavior: "smooth" });
 };
-
+// --- end replacement ---
 
 
 
@@ -1217,7 +1258,7 @@ precision, they evolve into impact — and sometimes, into<br></br>legacies.
 
         {/* Section 5 - Design Process */}
         <section className="w-screen h-screen relative flex items-center justify-between bg-white px-10">
-          <div className="flex items-center justify-start w-full translate-y-[-200px] sm:translate-x-[750px]">
+          <div className="flex items-center justify-start w-full h-full translate-y-[-200px] sm:translate-x-[750px]">
   {/* Big number 4 */}
   <div className="text-[150px] font-extrabold text-orange-500 leading-none flex-shrink-0">
     4
@@ -1250,8 +1291,8 @@ precision, they evolve into impact — and sometimes, into<br></br>legacies.
 
     
     {/* Orange line */}
-    <div className="absolute h-[2px] bg-orange-500 w-[1000px] translate-x-[100px] translate-y-[200px]" />
-  </div>
+    <div className="absolute h-[2px] bg-orange-500 w-[1000px] left-[100px] top-[200px]" />
+    </div>
 </div>
 
           <div className="translate-x-[-530px]">
@@ -1260,7 +1301,7 @@ precision, they evolve into impact — and sometimes, into<br></br>legacies.
             Connect & <br></br>
             Collaborate
             </h2>
-            <p className="text-white max-w-lg  text-[13px] leading-relaxed" style={{ width: "400px" }}>
+            <p className="text-white max-w-lg  text-[12px] leading-relaxed" style={{ width: "400px" }}>
             We begin by immersing ourselves in your brand&apos;s <br></br>
 universe. Our international client base feeds on trust, <br></br>
 enduring partnerships, and solid referrals. Let&apos;s get <br></br>
@@ -1276,7 +1317,7 @@ something amazing.
             Make It <br></br>
 Happen
             </h2>
-            <p className="text-white  text-[13px] leading-relaxed"
+            <p className="text-white  text-[12px] leading-relaxed"
             style={{ width: "400px" }}>
 Concepts are only as good as their implementation. Our<br></br>
 service and marketing teams work diligently,<br></br>
@@ -1290,13 +1331,13 @@ panache.
             </div>
 
 
-            <div className="translate-x-[-550px]">
+            <div className="translate-x-[-560px]">
             <div className="translate-y-[-15px]">
             <h2 className="text-3xl font-extrabold text-orange-500 mb-1">
             Define <br></br>
 Your Vision
             </h2>
-            <p className="text-black max-w-lg  text-[13px] leading-relaxed" style={{ width: "400px" }}>
+            <p className="text-black max-w-lg  text-[12px] leading-relaxed" style={{ width: "400px" }}>
             Brilliant campaigns begin with crystal-clear<br></br>
 objectives. We reveal your brand&apos;s purpose and<br></br>
 develop targets that dont merely reach for the stars—<br></br>
@@ -1319,7 +1360,7 @@ and resonates.
             Develop a <br></br>
 Winning Strategy
             </h2>
-            <p className="text-black max-w-lg  text-[13px] leading-relaxed" style={{ width: "400px" }}>
+            <p className="text-black max-w-lg  text-[12px] leading-relaxed" style={{ width: "400px" }}>
             Our digital specialists dont merely plan; they<br></br>
 create. We develop a vibrant, results-driven media<br></br>
 strategy that&apos;s as distinctive as your brand, aimed<br></br>

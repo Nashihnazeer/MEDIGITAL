@@ -9,12 +9,13 @@ import { usePathname, useRouter } from "next/navigation";
 type NavItem = { label: string; href: string };
 
 const navItems: NavItem[] = [
-  { label: "REACH US", href: "#reachusdesktop" },
+  { label: "ABOUT US", href: "#ourwaydesktop" },
+  { label: "SERVICES", href: "#ServicesDesktop" },
+  { label: "PORTFOLIO", href: "#portfoliodesktop" },
   { label: "BLOG", href: "/blog" },
-  { label: "PORTFOLIO", href: "#portfolio" },
-  { label: "SERVICES", href: "#services" },
-  { label: "ABOUT US", href: "#aboutus" },
+  { label: "REACH US", href: "#reachusdesktop" },
 ];
+
 
 const SCROLL_DELAY_AFTER_NAV_MS = 300;
 
@@ -162,8 +163,9 @@ const Header: React.FC = () => {
     "horizontalscroll",
     "horizontal-scroll",
     "horizontal",
-    "horizontalscrollwebsite",
+    // removed "horizontalscrollwebsite" so header remains visible on that route
   ];
+  
 
   const pathnameLower = (pathname || "").toLowerCase();
   const searchStringLower = (searchString || "").toLowerCase();
@@ -192,9 +194,15 @@ const Header: React.FC = () => {
   }
 
   // anchor -> route map (adjust if the route name differs)
-  const anchorRouteMap: Record<string, string> = {
-    "#reachusdesktop": "/horizontalscrollwebsite",
-  };
+ // Map any header hash to the horizontalscrollwebsite route so clicking the header
+// navigates to that page and then smooth-scrolls to the anchor.
+const anchorRouteMap: Record<string, string> = {
+  "#ourwaydesktop": "/horizontalscrollwebsite",
+  "#ServicesDesktop": "/horizontalscrollwebsite",
+  "#portfoliodesktop": "/horizontalscrollwebsite",
+  "#reachusdesktop": "/horizontalscrollwebsite",
+};
+
 
   // utility: smooth scroll
   const smoothScrollTo = (hashVal: string) => {
@@ -213,43 +221,61 @@ const Header: React.FC = () => {
     return true;
   };
 
-  const handleClick = (e: React.MouseEvent, href: string) => {
+  const handleClick = async (e: React.MouseEvent, href: string) => {
     const closeMobile = () => setMobileOpen(false);
-
+  
+    // External full routes (e.g. /blog)
     if (href.startsWith("/")) {
       e.preventDefault();
       closeMobile();
-      router.push(href);
+      try {
+        await router.push(href);
+      } catch (err) {
+        console.warn("[Header] router.push failed:", err);
+      }
       return;
     }
-
+  
+    // Anchor links (hash)
     if (href.startsWith("#")) {
       e.preventDefault();
       closeMobile();
-
+  
       const targetRoute = anchorRouteMap[href] ?? "/";
-
+  
+      // If already on the target page, scroll immediately (no event needed)
       if (pathname === targetRoute) {
         smoothScrollTo(href);
         return;
       }
-
+  
+      // Otherwise navigate to the target page first, then dispatch a custom event
+      // that the destination page will listen for and handle when it's ready.
       try {
-        router.push(targetRoute + href);
+        await router.push(targetRoute);
       } catch (err) {
         console.warn("[Header] router.push failed for anchor navigation:", err);
       }
-
-      // fallback attempt
+  
+      // Dispatch a CustomEvent to signal the destination page to scroll to the hash.
+      // We dispatch after a tiny delay to ensure the navigation has initiated; the
+      // destination page has an effect listening for 'header-scroll-to' and will
+      // perform the correct scroll once it has laid out.
       setTimeout(() => {
-        smoothScrollTo(href);
-      }, SCROLL_DELAY_AFTER_NAV_MS);
-
+        try {
+          window.dispatchEvent(new CustomEvent("header-scroll-to", { detail: href }));
+        } catch (err) {
+          console.warn("[Header] failed to dispatch header-scroll-to event", err);
+        }
+      }, 60); // small delay is harmless; destination will also handle direct hash on load
+  
       return;
     }
-
-    // external - default
+  
+    // For other schemes (mailto:, tel:, etc.) let the browser handle natively.
   };
+  
+  
 
   const isRouteActive = (href: string) => {
     if (!href || !href.startsWith("/")) return false;

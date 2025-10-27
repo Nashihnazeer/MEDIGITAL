@@ -6,7 +6,7 @@ import AnimatedSmiley from "@/components/AnimatedSmiley";
 import ServicePillList, { ServiceItem } from "@/components/Servicelist";
 import logoData, { type LogoItem } from "@/data/logoData";
 import Link from "next/link";
-
+import ClientsCarousel from "@/components/ClientsCarousel";
 
 
 
@@ -1412,61 +1412,10 @@ at captivating and converting on your budget.
         </p>
       </div>
   {/* Right side - Logo carousel with button control */}
-  <div className="w-screen h-auto flex items-center justify-center translate-y-[90px] translate-x-[-480px]">
-  <div className="relative w-screen h-[200px] bg-white rounded-lg flex items-center px-10 overflow-hidden">
-    {/* Left button */}
-    <button
-      onClick={scrollLogosLeft}
-      type="button"
-      aria-label="Previous logos"
-      className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-white rounded-full p-3 shadow-lg hover:bg-gray-300"
-    >
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M15 18l-6-6 6-6" />
-      </svg>
-    </button>
-
-    {/* Right button */}
-    <button
-      onClick={scrollLogosRight}
-      type="button"
-      aria-label="Next logos"
-      className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-white rounded-full p-3 shadow-lg hover:bg-gray-300"
-    >
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M9 18l6-6-6-6" />
-      </svg>
-    </button>
-
-    {/* Logos */}
-    {/* Logos */}
-<div
-  ref={logoScrollRef}
-  className="flex space-x-16 w-full py-4 overflow-x-auto scroll-smooth no-scrollbar"
->
-  {logoData.map((logo) => (
-    <button
-      key={logo.id}
-      type="button"
-      onClick={() => openModal(logo)}
-      className="w-32 h-20 relative flex-shrink-0 focus:outline-none"
-      aria-label={logo.title}
-    >
-      <div className="relative w-full h-full">
-        <Image
-          src={logo.src}
-          alt={logo.title}
-          fill
-          style={{ objectFit: "contain" }}
-          className="hover:scale-110 transition-transform duration-300"
-        />
-      </div>
-    </button>
-  ))}
+  {/* Right side - Logo carousel rendered by client component */}
+<div className="w-screen h-auto flex items-center justify-center translate-y-[90px] translate-x-[-480px]">
+  <ClientsCarousel apiUrl="/api/clients" />
 </div>
-  </div>
-
-  </div>
   
 </section>
 {/* Simple Modal */}

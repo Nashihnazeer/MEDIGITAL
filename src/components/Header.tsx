@@ -49,7 +49,7 @@ const Header: React.FC = () => {
   // Debug logging only in dev
   useEffect(() => {
     if (process.env.NODE_ENV === "development") {
-      // eslint-disable-next-line no-console
+       
       console.debug("[Header] pathname:", pathname, "search:", searchString);
     }
   }, [pathname, searchString]);
@@ -183,7 +183,7 @@ const Header: React.FC = () => {
 
   if (shouldHideHeader) {
     if (process.env.NODE_ENV === "development") {
-      // eslint-disable-next-line no-console
+       
       console.debug("[Header] hidden because route/search/hash matched hide rules:", {
         pathname,
         search: searchString,

@@ -1,17 +1,31 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: true,
   images: {
     remotePatterns: [
-      { protocol: "https", hostname: "placehold.co" },
+      // existing placeholder host
+      { protocol: "https", hostname: "placehold.co", pathname: "/**" },
+
+      // supabase storage (your project)
+      {
+        protocol: "https",
+        hostname: "pyukwgwdycseqyvypavm.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+
+      // allow example.com for dev / placeholder images (remove in production)
+      { protocol: "https", hostname: "example.com", pathname: "/**" },
     ],
   },
-  reactStrictMode: true,
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/horizontalscrollwebsite",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
-
-export async function redirects() {
-  return [
-    { source: "/", destination: "/horizontalscrollwebsite", permanent: false },
-  ];
-}

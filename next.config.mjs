@@ -1,22 +1,32 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+
   images: {
     remotePatterns: [
-      // existing placeholder host
-      { protocol: "https", hostname: "placehold.co", pathname: "/**" },
+      // ✅ allow placeholder images
+      {
+        protocol: "https",
+        hostname: "via.placeholder.com",
+        pathname: "/**",
+      },
 
-      // supabase storage (your project)
+      // ✅ Supabase storage bucket (replace with your actual project ref if different)
       {
         protocol: "https",
         hostname: "pyukwgwdycseqyvypavm.supabase.co",
         pathname: "/storage/v1/object/public/**",
       },
 
-      // allow example.com for dev / placeholder images (remove in production)
-      { protocol: "https", hostname: "example.com", pathname: "/**" },
+      // Optional: allow example.com (development only)
+      {
+        protocol: "https",
+        hostname: "example.com",
+        pathname: "/**",
+      },
     ],
   },
+
   async redirects() {
     return [
       {
@@ -28,4 +38,5 @@ const nextConfig = {
   },
 };
 
+// ✅ Export correctly for Next.js 15 ESM config
 export default nextConfig;

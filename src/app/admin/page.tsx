@@ -55,18 +55,24 @@ export default function AdminPage() {
   }, []);
 
   async function fetchList() {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/admin/clients");
-      const json = await res.json().catch(() => ({}));
-      setList(Array.isArray(json) ? json : []);
-    } catch (err) {
-      console.error("fetchList error:", err);
-      setStatus("Failed to load clients");
-    } finally {
-      setLoading(false);
-    }
+  setLoading(true);
+  setStatus(null);
+  try {
+    const res = await fetch("/api/clients");
+    // helpful debug: log status if things look off
+    console.debug("[admin fetchList] /api/clients status:", res.status);
+    const json = await res.json().catch(() => ({}));
+    console.debug("[admin fetchList] /api/clients json:", json);
+    setList(Array.isArray(json) ? json : []);
+    if (!Array.isArray(json)) setStatus("Unexpected response from /api/clients — check server logs");
+  } catch (err) {
+    console.error("Error fetching clients (admin):", err);
+    setStatus("Failed to load clients (see console)");
+    setList([]);
+  } finally {
+    setLoading(false);
   }
+}
 
   // ---------- robust response reader ----------
   async function readResponse(res: Response) {

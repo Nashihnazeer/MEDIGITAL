@@ -3,139 +3,59 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export const runtime = "nodejs";
+const TABLE = "clients";
 
-function getStoragePathFromPublicUrl(url: string, bucketName = "client-assets") {
-  if (!url) return null;
+export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   try {
-    const u = new URL(url);
-    // example pathname: /storage/v1/object/public/client-assets/uploads/123.png
-    const parts = u.pathname.split("/").filter(Boolean);
-    // find the index of the bucket name (client-assets)
-    const bucketIdx = parts.findIndex((p) => p === bucketName);
-    if (bucketIdx === -1) return null;
-    const after = parts.slice(bucketIdx + 1);
-    if (!after.length) return null;
-    return after.join("/");
-  } catch (e) {
-    return null;
+    const id = params.id;
+    if (!id) return NextResponse.json({ error: "Missing id in path" }, { status: 400 });
+
+    const payload = (await req.json()) as Record<string, any>;
+    const update: Record<string, any> = {};
+
+    if (payload.client_name ?? payload.clientName) update.client_name = payload.client_name ?? payload.clientName;
+    if (payload.logo_url ?? payload.logoUrl) update.logo_url = payload.logo_url ?? payload.logoUrl;
+    if (payload.blog_title ?? payload.blogTitle) update.blog_title = payload.blog_title ?? payload.blogTitle;
+    if (payload.blog_slug ?? payload.blogSlug) update.blog_slug = payload.blog_slug ?? payload.blogSlug;
+    if (payload.cta_text ?? payload.ctaText) update.cta_text = payload.cta_text ?? payload.ctaText;
+    if (payload.blog_body_html ?? payload.blogBodyHtml) update.blog_body_html = payload.blog_body_html ?? payload.blogBodyHtml;
+    if (payload.blog_feature_image ?? payload.blogFeatureImage) update.blog_feature_image = payload.blog_feature_image ?? payload.blogFeatureImage;
+    if (payload.images !== undefined) update.images = Array.isArray(payload.images) ? payload.images : [];
+    if (payload.body_data !== undefined) update.body_data = payload.body_data;
+
+    if (Object.keys(update).length === 0) {
+      return NextResponse.json({ error: "No updatable fields provided" }, { status: 400 });
+    }
+
+    const { data, error } = await supabaseAdmin.from(TABLE).update(update).eq("id", id).select("*").single();
+
+    if (error) {
+      console.error("[PATCH /api/admin/clients/[id]] update error:", error);
+      return NextResponse.json({ error: error.message ?? "Update failed" }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, row: data }, { status: 200 });
+  } catch (err: any) {
+    console.error("[PATCH /api/admin/clients/[id]] exception:", err);
+    return NextResponse.json({ error: err?.message ?? "server error" }, { status: 500 });
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id?: string } }) {
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   try {
-    const id = params?.id;
-    if (!id) return NextResponse.json({ error: "Missing id param" }, { status: 400 });
+    const id = params.id;
+    if (!id) return NextResponse.json({ error: "Missing id in path" }, { status: 400 });
 
-    // read row to find images to delete
-    const { data: row, error: fetchErr } = await supabaseAdmin
-      .from("clients")
-      .select("*")
-      .eq("id", id)
-      .single();
+    const { data, error } = await supabaseAdmin.from(TABLE).delete().eq("id", id).select("*").single();
 
-    if (fetchErr && fetchErr.code !== "PGRST116") {
-      console.error("fetchErr:", fetchErr);
-      return NextResponse.json({ error: fetchErr.message || String(fetchErr) }, { status: 500 });
+    if (error) {
+      console.error("[DELETE /api/admin/clients/[id]] delete error:", error);
+      return NextResponse.json({ error: error.message ?? "Delete failed" }, { status: 500 });
     }
 
-    if (!row) return NextResponse.json({ error: "Not found" }, { status: 404 });
-
-    const bucketName = "client-assets"; // adjust if your bucket has different name
-    const toRemove: string[] = [];
-
-    const logoUrl = row.logo_url ?? row.logoUrl ?? null;
-    const featureUrl = row.blog_feature_image ?? row.blogFeatureImage ?? null;
-
-    const logoPath = logoUrl ? getStoragePathFromPublicUrl(logoUrl, bucketName) : null;
-    const featPath = featureUrl ? getStoragePathFromPublicUrl(featureUrl, bucketName) : null;
-
-    if (logoPath) toRemove.push(logoPath);
-    if (featPath && featPath !== logoPath) toRemove.push(featPath);
-
-    if (toRemove.length > 0) {
-      try {
-        const { data: delData, error: delError } = await supabaseAdmin
-          .storage
-          .from(bucketName)
-          .remove(toRemove);
-
-        if (delError) {
-          console.error("Storage delete error:", delError);
-          // don't fail the entire deletion because of storage deletion failure,
-          // but inform the client in the response.
-        } else {
-          console.log("Removed storage objects:", delData);
-        }
-      } catch (err) {
-        console.error("Exception deleting storage objects:", err);
-      }
-    }
-
-    // delete DB row
-    const { data: deletedRow, error: deleteErr } = await supabaseAdmin
-      .from("clients")
-      .delete()
-      .eq("id", id)
-      .select()
-      .single();
-
-    if (deleteErr) {
-      console.error("Error deleting DB row:", deleteErr);
-      return NextResponse.json({ error: deleteErr.message || String(deleteErr) }, { status: 500 });
-    }
-
-    return NextResponse.json({ success: true, deleted: deletedRow }, { status: 200 });
+    return NextResponse.json({ success: true, row: data }, { status: 200 });
   } catch (err: any) {
-    console.error("DELETE /api/admin/clients/[id] error:", err);
-    return NextResponse.json({ error: err.message || "Server error" }, { status: 500 });
-  }
-}
-
-export async function PATCH(req: Request, { params }: { params: { id?: string } }) {
-  try {
-    const id = params?.id;
-    if (!id) return NextResponse.json({ error: "Missing id param" }, { status: 400 });
-
-    const body = await req.json().catch(() => ({}));
-    if (!body || Object.keys(body).length === 0) {
-      return NextResponse.json({ error: "Missing body" }, { status: 400 });
-    }
-
-    // Only allow these updatable fields (map to DB column names)
-    const allowed: Record<string, string> = {
-      client_name: "client_name",
-      blog_title: "blog_title",
-      blog_slug: "blog_slug",
-      blog_body_html: "blog_body_html",
-      cta_text: "cta_text",
-      logo_url: "logo_url",
-      blog_feature_image: "blog_feature_image",
-    };
-
-    const payload: Record<string, any> = {};
-    for (const key of Object.keys(allowed)) {
-      if (body[key] !== undefined) payload[allowed[key]] = body[key];
-    }
-
-    if (Object.keys(payload).length === 0) {
-      return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
-    }
-
-    const { data: updated, error: updateErr } = await supabaseAdmin
-      .from("clients")
-      .update(payload)
-      .eq("id", id)
-      .select()
-      .single();
-
-    if (updateErr) {
-      console.error("Update error:", updateErr);
-      return NextResponse.json({ error: updateErr.message || String(updateErr) }, { status: 500 });
-    }
-
-    return NextResponse.json({ success: true, updated }, { status: 200 });
-  } catch (err: any) {
-    console.error("PATCH /api/admin/clients/[id] error:", err);
-    return NextResponse.json({ error: err.message || "Server error" }, { status: 500 });
+    console.error("[DELETE /api/admin/clients/[id]] exception:", err);
+    return NextResponse.json({ error: err?.message ?? "server error" }, { status: 500 });
   }
 }

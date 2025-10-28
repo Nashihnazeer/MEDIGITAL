@@ -61,7 +61,6 @@ export default async function BlogDetailPage({
     client.blog_feature_image ??
     client.blogFeatureImage ??
     client.blogFeatureImageUrl ??
-    client.blog_feature_image_url ??
     (images.length > 0 ? images[0] : null);
 
   return (

@@ -26,12 +26,14 @@ const AnimatedSmiley: React.FC<SafeImgProps> = ({
   style,
   width = 256,
   height = 256,
-  loading = "lazy",
+  loading ,
   decoding = "async",
-  priority = false,
+  // default to true so Next will prioritize this image for LCP and deliver highest quality
+  priority = true,
   fetchPriority,
   crossOrigin,
-  unoptimized = false, // default to optimized delivery for high quality
+  // serve original image (disable next/image optimization) for absolute fidelity — opt-in choice
+  unoptimized = true,
 }) => {
   const prefersReducedMotion = useReducedMotion();
   const [isMobile, setIsMobile] = useState(false);
@@ -49,14 +51,17 @@ const AnimatedSmiley: React.FC<SafeImgProps> = ({
     };
   }, []);
 
-  // Subtle heartbeat: much smaller scale and slower to avoid pixelation
+  // Stronger heartbeat animation with subtle rotate to feel organic.
+  // Uses keyframes for scale and rotate; times tuned for punchy beat.
   const heartbeatAnim = {
-    scale: [1, 1.08, 1, 1.04, 1], // reduced amplitude
+    scale: isMobile ? [1, 1.16, 0.98, 1.12, 1] : [1, 1.2, 0.98, 1.14, 1],
+    rotate: isMobile ? [0, -1.2, 0.8, -0.6, 0] : [0, -1.8, 1.2, -1, 0],
     transition: {
-      duration: isMobile ? 2.0 : 3.0, // slightly slower for smoother rendering
+      duration: isMobile ? 1.6 : 2.4, // mobile slightly faster
       ease: "easeInOut" as any,
+      times: [0, 0.18, 0.45, 0.75, 1], // punchy early peak
       repeat: Infinity as any,
-      repeatType: "reverse" as const,
+      repeatType: "loop" as const,
     },
   };
 
@@ -72,60 +77,61 @@ const AnimatedSmiley: React.FC<SafeImgProps> = ({
     width: "100%",
     height: "100%",
     objectFit: "contain",
-    imageRendering: "auto", // important: don't force pixelated rendering
+    imageRendering: "auto",
     backfaceVisibility: "hidden",
     willChange: "transform",
     transformOrigin: "50% 50%",
     display: "block",
   };
 
+  // Respect reduced motion preference
   if (prefersReducedMotion) {
     return (
       <div style={containerStyle} className={`select-none ${className}`}>
-        <Image
-          src={src}
-          alt={alt}
-          width={width}
-          height={height}
-          loading={loading}
-          decoding={decoding}
-          priority={priority}
-          fetchPriority={fetchPriority as any}
-          crossOrigin={crossOrigin as any}
-          unoptimized={unoptimized}
-          quality={100}               // request highest quality
-          sizes={`${width}px`}        // help next/image select the best source
-          draggable={false}
-          style={imageStyle}
-        />
+                <Image
+  src={src}
+  alt={alt}
+  width={width}
+  height={height}
+  {...(!priority ? { loading } : {})}
+  decoding={decoding}
+  priority={priority}
+  fetchPriority={fetchPriority as any}
+  crossOrigin={crossOrigin as any}
+  unoptimized={unoptimized}
+  quality={100}
+  sizes={`${width}px`}
+  draggable={false}
+  style={imageStyle}
+/>
       </div>
     );
   }
 
   return (
     <motion.div
-      whileHover={{ scale: 1.03 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={{ scale: 1.08 }}
+      whileTap={{ scale: 0.96 }}
       animate={heartbeatAnim as any}
       style={containerStyle}
       className={`block will-change-transform select-none pointer-events-auto ${className}`}
     >
       <Image
-        src={src}
-        alt={alt}
-        width={width}
-        height={height}
-        loading={loading}
-        decoding={decoding}
-        priority={priority}
-        fetchPriority={fetchPriority as any}
-        crossOrigin={crossOrigin as any}
-        unoptimized={unoptimized}
-        quality={100}               // highest quality
-        sizes={`${width}px`}
-        draggable={false}
-        style={imageStyle}
-      />
+  src={src}
+  alt={alt}
+  width={width}
+  height={height}
+  {...(!priority ? { loading } : {})}
+  decoding={decoding}
+  priority={priority}
+  fetchPriority={fetchPriority as any}
+  crossOrigin={crossOrigin as any}
+  unoptimized={unoptimized}
+  quality={100}
+  sizes={`${width}px`}
+  draggable={false}
+  style={imageStyle}
+/>
     </motion.div>
   );
 };

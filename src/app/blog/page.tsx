@@ -15,6 +15,7 @@ type ClientBlog = {
   ctaText: string;
   blogFeatureImageUrl?: string;
   createdAt: string;
+  images?: string[]; // <-- new: array of uploaded images (1-4)
 };
 
 export default function BlogListPage() {
@@ -27,7 +28,7 @@ export default function BlogListPage() {
       try {
         const res = await fetch("/api/clients");
         const data = await res.json();
-        setClients(data);
+        setClients(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Error fetching clients:", err);
       } finally {
@@ -40,6 +41,10 @@ export default function BlogListPage() {
   const INITIAL_COUNT = 9;
   const initialPosts = clients.slice(0, INITIAL_COUNT);
   const remainingPosts = clients.slice(INITIAL_COUNT);
+
+  // helper: pick a display image (feature image first, then first of images array)
+  const pickImage = (c: ClientBlog) =>
+    c.blogFeatureImageUrl || (c.images && c.images.length > 0 ? c.images[0] : null);
 
   return (
     <main
@@ -71,9 +76,9 @@ export default function BlogListPage() {
                 >
                   <Link href={`/blog/${client.blogSlug}`} className="block">
                     <div className="relative h-48 w-full overflow-hidden bg-gray-100">
-                      {client.blogFeatureImageUrl ? (
+                      {pickImage(client) ? (
                         <Image
-                          src={client.blogFeatureImageUrl}
+                          src={pickImage(client) as string}
                           alt={client.blogTitle}
                           fill
                           style={{ objectFit: "cover" }}
@@ -85,12 +90,13 @@ export default function BlogListPage() {
                         </div>
                       )}
                     </div>
+
                     <div className="p-4">
                       <h2 className="font-semibold text-lg mb-2">{client.blogTitle}</h2>
                       <p
                         className="text-sm text-gray-600 line-clamp-3"
                         dangerouslySetInnerHTML={{
-                          __html: client.blogBodyHtml.substring(0, 120) + "...",
+                          __html: (client.blogBodyHtml || "").substring(0, 120) + "...",
                         }}
                       />
                       <div className="flex items-center justify-between text-xs text-gray-500 mt-3">
@@ -118,9 +124,9 @@ export default function BlogListPage() {
                       >
                         <Link href={`/blog/${client.blogSlug}`} className="block">
                           <div className="relative h-64 w-full overflow-hidden bg-gray-100">
-                            {client.blogFeatureImageUrl ? (
+                            {pickImage(client) ? (
                               <Image
-                                src={client.blogFeatureImageUrl}
+                                src={pickImage(client) as string}
                                 alt={client.blogTitle}
                                 fill
                                 style={{ objectFit: "cover" }}
@@ -136,7 +142,7 @@ export default function BlogListPage() {
                             <p
                               className="text-sm text-gray-600 line-clamp-4"
                               dangerouslySetInnerHTML={{
-                                __html: client.blogBodyHtml.substring(0, 160) + "...",
+                                __html: (client.blogBodyHtml || "").substring(0, 160) + "...",
                               }}
                             />
                             <div className="flex items-center justify-between text-xs text-gray-500 mt-3">

@@ -81,10 +81,10 @@ export default function ClientsCarousel({ apiUrl = "/api/clients" }: ClientsCaro
   }
 
   function scrollLogosLeft() {
-    logoScrollRef.current?.scrollBy({ left: -200, behavior: "smooth" });
+    logoScrollRef.current?.scrollBy({ left: -240, behavior: "smooth" });
   }
   function scrollLogosRight() {
-    logoScrollRef.current?.scrollBy({ left: 200, behavior: "smooth" });
+    logoScrollRef.current?.scrollBy({ left: 240, behavior: "smooth" });
   }
 
   if (loading) return <div className="py-8 text-center">Loading clients…</div>;
@@ -94,69 +94,121 @@ export default function ClientsCarousel({ apiUrl = "/api/clients" }: ClientsCaro
 
   return (
     <>
-      <div className="relative w-full">
-        <button onClick={scrollLogosLeft} aria-label="previous" className="absolute left-2 top-1/2 z-10 p-2 bg-white rounded-full shadow">
-          ‹
-        </button>
-        <button onClick={scrollLogosRight} aria-label="next" className="absolute right-2 top-1/2 z-10 p-2 bg-white rounded-full shadow">
-          ›
-        </button>
+      {/* Full-bleed white background — stretches edge-to-edge */}
+      <section className="w-full bg-white overflow-hidden">
+        <div className="relative max-w-full mx-auto">
+          {/* Left button */}
+          <button
+            onClick={scrollLogosLeft}
+            aria-label="Previous logos"
+            className="absolute left-3 top-1/2 z-10 p-2 -translate-y-1/2 bg-white rounded-full shadow-md focus:outline-none focus:ring"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
 
-        <div ref={logoScrollRef} className="flex space-x-8 overflow-x-auto py-6 px-6 no-scrollbar">
-          {items.map((it) => (
-            <button
-              key={it.id}
-              onClick={() => openModal(it)}
-              className="w-36 h-20 flex-shrink-0 flex items-center justify-center bg-white/0 rounded focus:outline-none"
-              aria-label={it.title}
-            >
-              {it.logo ? (
-                <div className="relative w-full h-full">
-                  <Image
-                    src={it.logo}
-                    alt={`${it.title} logo`}
-                    fill
-                    style={{ objectFit: "contain" }}
-                    sizes="120px"
-                    // add `unoptimized` if you don't want Next Image optimization for external URLs:
-                    // unoptimized
-                  />
-                </div>
-              ) : (
-                <div className="text-sm text-gray-500">{it.title}</div>
-              )}
-            </button>
-          ))}
+          {/* Right button */}
+          <button
+            onClick={scrollLogosRight}
+            aria-label="Next logos"
+            className="absolute right-3 top-1/2 z-10 p-2 -translate-y-1/2 bg-white rounded-full shadow-md focus:outline-none focus:ring"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </button>
+
+          {/* Scroll area */}
+          <div
+            ref={logoScrollRef}
+            className="flex items-center gap-8 overflow-x-auto py-6 px-6 no-scrollbar scroll-smooth"
+          >
+            {/* Add some left padding so logos don't stick to edge */}
+            <div className="flex-shrink-0 w-6" />
+
+            {items.map((it) => (
+              <button
+                key={it.id}
+                onClick={() => openModal(it)}
+                className="w-36 h-20 flex-shrink-0 flex items-center justify-center bg-white rounded focus:outline-none"
+                aria-label={it.title}
+                title={it.title}
+              >
+                {it.logo ? (
+                  <div className="relative w-full h-full p-2">
+                    <Image
+                      src={it.logo}
+                      alt={`${it.title} logo`}
+                      fill
+                      style={{ objectFit: "contain" }}
+                      sizes="144px"
+                      unoptimized // avoids Next image host config issues for external URLs
+                    />
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-600">{it.title}</div>
+                )}
+              </button>
+            ))}
+
+            {/* Add some right padding too */}
+            <div className="flex-shrink-0 w-6" />
+          </div>
         </div>
-      </div>
+      </section>
 
       {/* Modal */}
       {modalOpen && active && (
-        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={closeModal}>
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          onClick={closeModal}
+        >
           <div className="absolute inset-0 bg-black/60" />
-          <div className="relative z-10 max-w-lg w-full bg-white rounded p-6" onClick={(e) => e.stopPropagation()}>
-            <button onClick={closeModal} className="absolute right-3 top-3">✕</button>
+          <div
+            className="relative z-10 max-w-lg w-full bg-white rounded-lg shadow-lg p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={closeModal}
+              aria-label="Close"
+              className="absolute right-3 top-3 text-gray-600 hover:text-black"
+            >
+              ✕
+            </button>
 
             <div className="flex justify-center mb-4">
               <div className="relative w-40 h-20">
                 {active.logo ? (
-                  <Image src={active.logo} alt={`${active.title} logo`} fill style={{ objectFit: "contain" }} />
+                  <Image
+                    src={active.logo}
+                    alt={`${active.title} logo`}
+                    fill
+                    style={{ objectFit: "contain" }}
+                    unoptimized
+                  />
                 ) : null}
               </div>
             </div>
 
             <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">{active.title}</h3>
-            <div className="text-sm text-gray-700 mb-4" dangerouslySetInnerHTML={{ __html: active.body }} />
+
+            <div
+              className="text-sm text-gray-700 mb-4 prose max-w-none"
+              dangerouslySetInnerHTML={{ __html: active.body }}
+            />
 
             <div className="flex justify-center gap-3">
               {active.blogSlug ? (
                 <Link
-  href={`/blog/${active.blogSlug}`}
-  onClick={closeModal}
-  className="inline-block bg-orange-500 text-white px-4 py-2 rounded text-sm"
->
-  {active.ctaText || "Read full blog"}
-</Link>
+                  href={`/blog/${active.blogSlug}`}
+                  onClick={closeModal}
+                  className="inline-block bg-orange-500 text-white px-4 py-2 rounded text-sm"
+                >
+                  {active.ctaText || "Read full blog"}
+                </Link>
               ) : (
                 <span className="text-sm text-gray-500">No blog linked</span>
               )}

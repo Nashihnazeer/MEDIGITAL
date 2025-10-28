@@ -3,12 +3,13 @@
 @tailwind utilities;
 
 /* Reset default margins and paddings */
-html,
+html, body, #__next {
+  height: 100%;
+}
 body {
-  margin: 0;
-  padding: 0;
-  scroll-behavior: smooth;
-  overflow-x: hidden; /* Prevent unwanted horizontal scrollbar */
+  margin: 0; /* remove default body margin that can create whitespace */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Ensure the body takes full height */

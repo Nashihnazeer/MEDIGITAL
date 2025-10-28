@@ -22,7 +22,7 @@ export default function RootLayout({
         <Header />
 
         {/* ✅ Main Page Content */}
-        <main className="pt-[72px]"> {/* adjust padding if header height changes */}
+        <main className="relative min-h-screen w-full bg-fixed bg-cover bg-center bg-no-repeat">{/* adjust padding if header height changes */}
           {children}
         </main>
       </body>

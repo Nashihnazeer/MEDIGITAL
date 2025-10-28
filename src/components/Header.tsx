@@ -10,12 +10,11 @@ type NavItem = { label: string; href: string };
 
 const navItems: NavItem[] = [
   { label: "ABOUT US", href: "#ourwaydesktop" },
-  { label: "SERVICES", href: "#ServicesDesktop" },
+  { label: "SERVICES", href: "#servicesdesktop" },
   { label: "PORTFOLIO", href: "#portfoliodesktop" },
   { label: "BLOG", href: "/blog" },
   { label: "REACH US", href: "#reachusdesktop" },
 ];
-
 
 const SCROLL_DELAY_AFTER_NAV_MS = 300;
 
@@ -23,7 +22,7 @@ const Header: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname() ?? "";
 
-  // === hooks (all declared up front; do NOT conditionally return before these) ===
+  // state & refs
   const [activeHash, setActiveHash] = useState<string | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
@@ -33,33 +32,30 @@ const Header: React.FC = () => {
 
   const [searchString, setSearchString] = useState<string>("");
 
-  // Memo for anchor ids (stable)
+  // anchor ids (from navItems that are hashes)
   const anchorIds = useMemo(
     () => navItems.filter((n) => n.href.startsWith("#")).map((n) => n.href.replace("#", "")),
     []
   );
 
-  // Client-only search string setter
+  // read initial search string (client-only)
   useEffect(() => {
     if (typeof window !== "undefined") {
       setSearchString(window.location.search || "");
     }
   }, []);
 
-  // Debug logging only in dev
+  // debug in dev
   useEffect(() => {
     if (process.env.NODE_ENV === "development") {
-       
       console.debug("[Header] pathname:", pathname, "search:", searchString);
     }
   }, [pathname, searchString]);
 
-  // Close mobile menu on route change
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
+  // close mobile menu on route change
+  useEffect(() => setMobileOpen(false), [pathname]);
 
-  // Close on escape and detect outside clicks
+  // close on escape and outside clicks
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -83,16 +79,15 @@ const Header: React.FC = () => {
     };
   }, [mobileOpen]);
 
-  // Scroll-spy observation (only runs in browser)
+  // scroll-spy: observe anchor sections on the homepage
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // if not homepage, clear activeHash and attempt a one-time scroll to any hash
+    // If not homepage, try a single one-time scroll to hash and skip observer
     if (pathname !== "/") {
       setActiveHash(null);
       const urlHash = window.location.hash;
       if (urlHash) {
-        // try to scroll once
         const id = urlHash.replace(/^#/, "");
         const el = document.getElementById(id);
         if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -100,7 +95,7 @@ const Header: React.FC = () => {
       return;
     }
 
-    // disconnect previous observer
+    // cleanup old observer
     if (observerRef.current) {
       observerRef.current.disconnect();
       observerRef.current = null;
@@ -114,7 +109,7 @@ const Header: React.FC = () => {
 
     const options: IntersectionObserverInit = {
       root: null,
-      rootMargin: "-35% 0% -55% 0%",
+      rootMargin: "-35% 0% -55% 0%", // triggers near center
       threshold: 0,
     };
 
@@ -132,6 +127,7 @@ const Header: React.FC = () => {
     elements.forEach((it) => obs.observe(it.el));
     observerRef.current = obs;
 
+    // if url already has hash, scroll to it once
     if (window.location.hash) {
       const id = window.location.hash.replace(/^#/, "");
       const el = document.getElementById(id);
@@ -144,34 +140,28 @@ const Header: React.FC = () => {
     };
   }, [pathname, anchorIds]);
 
-  // hashchange listener
+  // listen for header-scroll-to events (dispatched by header after navigation)
   useEffect(() => {
-    const onHashChange = () => {
-      if (window.location.hash) {
-        const id = window.location.hash.replace(/^#/, "");
+    const onHeaderScrollTo = (ev: Event) => {
+      try {
+        const detail = (ev as CustomEvent).detail as string | undefined;
+        if (!detail) return;
+        const id = detail.replace(/^#/, "");
         const el = document.getElementById(id);
         if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      } catch (err) {
+        // ignore
       }
     };
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
+    window.addEventListener("header-scroll-to", onHeaderScrollTo as EventListener);
+    return () => window.removeEventListener("header-scroll-to", onHeaderScrollTo as EventListener);
   }, []);
-  // === end of hooks ===
 
-  // ----- HIDE CONDITIONS (robust) -----
-  const hideSubstrings = [
-    "horizontalscroll",
-    "horizontal-scroll",
-    "horizontal",
-    // removed "horizontalscrollwebsite" so header remains visible on that route
-  ];
-  
-
+  // hide header on certain routes / search / hash substrings (existing rule)
+  const hideSubstrings = ["horizontalscroll", "horizontal-scroll", "horizontal"];
   const pathnameLower = (pathname || "").toLowerCase();
   const searchStringLower = (searchString || "").toLowerCase();
   const hash = typeof window !== "undefined" ? window.location.hash.toLowerCase() : "";
-
-  // support ?hideHeader=1 or ?hideHeader=true
   const queryParams = typeof window !== "undefined" ? new URLSearchParams(searchString) : new URLSearchParams();
   const hideHeaderFlag = queryParams.get("hideHeader");
   const shouldHideHeader =
@@ -183,7 +173,6 @@ const Header: React.FC = () => {
 
   if (shouldHideHeader) {
     if (process.env.NODE_ENV === "development") {
-       
       console.debug("[Header] hidden because route/search/hash matched hide rules:", {
         pathname,
         search: searchString,
@@ -193,23 +182,20 @@ const Header: React.FC = () => {
     return null;
   }
 
-  // anchor -> route map (adjust if the route name differs)
- // Map any header hash to the horizontalscrollwebsite route so clicking the header
-// navigates to that page and then smooth-scrolls to the anchor.
-const anchorRouteMap: Record<string, string> = {
-  "#ourwaydesktop": "/horizontalscrollwebsite",
-  "#ServicesDesktop": "/horizontalscrollwebsite",
-  "#portfoliodesktop": "/horizontalscrollwebsite",
-  "#reachusdesktop": "/horizontalscrollwebsite",
-};
+  // anchor -> route map (clicking header navigates to these pages first)
+  const anchorRouteMap: Record<string, string> = {
+    "#ourwaydesktop": "/horizontalscrollwebsite",
+    "#servicesdesktop": "/horizontalscrollwebsite",
+    "#portfoliodesktop": "/horizontalscrollwebsite",
+    "#reachusdesktop": "/horizontalscrollwebsite",
+  };
 
-
-  // utility: smooth scroll
+  // smooth scroll helper (used when already on the destination route)
   const smoothScrollTo = (hashVal: string) => {
     const id = hashVal.replace(/^#/, "");
     const el = typeof document !== "undefined" ? document.getElementById(id) : null;
     if (!el) {
-      console.warn("[Header] Anchor not found:", id);
+      // not found yet — caller may rely on header-scroll-to fallback
       return false;
     }
     el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -221,10 +207,11 @@ const anchorRouteMap: Record<string, string> = {
     return true;
   };
 
+  // central click handler for header links
   const handleClick = async (e: React.MouseEvent, href: string) => {
     const closeMobile = () => setMobileOpen(false);
-  
-    // External full routes (e.g. /blog)
+
+    // route links (e.g. /blog)
     if (href.startsWith("/")) {
       e.preventDefault();
       closeMobile();
@@ -235,47 +222,41 @@ const anchorRouteMap: Record<string, string> = {
       }
       return;
     }
-  
-    // Anchor links (hash)
+
+    // anchor/hash links
     if (href.startsWith("#")) {
       e.preventDefault();
       closeMobile();
-  
+
       const targetRoute = anchorRouteMap[href] ?? "/";
-  
-      // If already on the target page, scroll immediately (no event needed)
+
+      // if already on the target route, scroll immediately
       if (pathname === targetRoute) {
         smoothScrollTo(href);
         return;
       }
-  
-      // Otherwise navigate to the target page first, then dispatch a custom event
-      // that the destination page will listen for and handle when it's ready.
+
+      // otherwise navigate to the route, then dispatch an event to scroll when ready
       try {
         await router.push(targetRoute);
       } catch (err) {
         console.warn("[Header] router.push failed for anchor navigation:", err);
       }
-  
-      // Dispatch a CustomEvent to signal the destination page to scroll to the hash.
-      // We dispatch after a tiny delay to ensure the navigation has initiated; the
-      // destination page has an effect listening for 'header-scroll-to' and will
-      // perform the correct scroll once it has laid out.
+
+      // small delay then notify destination page to scroll
       setTimeout(() => {
         try {
           window.dispatchEvent(new CustomEvent("header-scroll-to", { detail: href }));
         } catch (err) {
           console.warn("[Header] failed to dispatch header-scroll-to event", err);
         }
-      }, 60); // small delay is harmless; destination will also handle direct hash on load
-  
+      }, 200);
+
       return;
     }
-  
-    // For other schemes (mailto:, tel:, etc.) let the browser handle natively.
+
+    // other schemes: let browser handle
   };
-  
-  
 
   const isRouteActive = (href: string) => {
     if (!href || !href.startsWith("/")) return false;
@@ -292,13 +273,7 @@ const anchorRouteMap: Record<string, string> = {
       <div className="max-w-[1400px] mx-auto flex items-center justify-between px-4 sm:px-8 py-3">
         <Link href="/" aria-label="Go to homepage" className="flex items-center space-x-2">
           <div className="relative w-[90px] h-[34px] sm:w-[100px] sm:h-[35px]">
-            <Image
-              src="/images/Group 18.png"
-              alt="medigital logo"
-              fill
-              style={{ objectFit: "contain" }}
-              priority
-            />
+            <Image src="/images/Group 18.png" alt="medigital logo" fill style={{ objectFit: "contain" }} priority />
           </div>
         </Link>
 
@@ -316,6 +291,7 @@ const anchorRouteMap: Record<string, string> = {
                 ? `${baseClass} text-white underline underline-offset-4 decoration-2 decoration-orange-400`
                 : `${baseClass} text-gray-300 hover:text-orange-400`;
 
+              // route links use next/link; still attach handler to ensure consistent behaviour
               if (item.href.startsWith("/")) {
                 return (
                   <li key={item.label}>
@@ -326,6 +302,7 @@ const anchorRouteMap: Record<string, string> = {
                 );
               }
 
+              // anchor links — use plain <a> with onClick
               return (
                 <li key={item.label}>
                   <a href={item.href} onClick={(e) => handleClick(e, item.href)} className={linkClass} aria-current={active ? "page" : undefined}>

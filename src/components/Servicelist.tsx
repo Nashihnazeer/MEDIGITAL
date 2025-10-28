@@ -63,7 +63,7 @@ const ServicePillList: React.FC<Props> = ({
               <div
                 className="flex items-center pl-6 pr-6 rounded-full shadow-inner"
                 style={{
-                  background: "rgb(226,154,77)",
+                  background: "#EEAA45",
                   height: pillHeight * 0.92,
                   marginLeft: -iconSize * 0.2,
                   flex: 1,

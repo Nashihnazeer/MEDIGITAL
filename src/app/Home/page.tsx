@@ -32,7 +32,11 @@ export default function Home() {
   const [spacerHeight, setSpacerHeight] = useState<number>(0);
   const [viewportWidth, setViewportWidth] = useState<number>(0);
   const [viewportHeight, setViewportHeight] = useState<number>(0);
-  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [hydrated, setHydrated] = useState(false);
+  const [isMobile, setIsMobile] = useState<boolean>(() => {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(max-width: 1024px)").matches;
+});
   const [showFullText, setShowFullText] = useState(false);
 
 
@@ -263,7 +267,7 @@ export default function Home() {
     });
 
     // optional: also handle resize (if layout depends on viewport)
-    window.addEventListener("resize", onVisible);
+
 
     return () => {
       window.removeEventListener("pageshow", onVisible);
@@ -484,38 +488,51 @@ useEffect(() => {
     };
   }, []);
 
-  // Resize / initial sizes (only for desktop)
   useEffect(() => {
-    if (isMobile) return;
+  setHydrated(true);
+}, []);
 
-    const updateSizes = () => {
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
+  // Resize / initial sizes (only for desktop)
 
-      // Calculate exact scroll distances
-      const horizontalSections = 3;
-      const totalWidth = vw * horizontalSections;
-      const horizontalScrollDistance = totalWidth - vw;
+  useEffect(() => {
+  // 🚫 Never conditionally change dependencies
+  if (!hydrated || isMobile) return;
 
-      setContainerWidth(totalWidth);
-      setViewportWidth(vw);
-      setViewportHeight(vh);
+  const updateSizes = () => {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
 
-      const bufferZone = vh * 0.8;
-      const transitionZone = vh * 1.2;
-      const verticalSections = 4.7;
-      setSpacerHeight(horizontalScrollDistance + bufferZone + transitionZone + vh * verticalSections);
+    const horizontalSections = 3;
+    const totalWidth = vw * horizontalSections;
+    const horizontalScrollDistance = totalWidth - vw;
 
-      if (containerRef.current) {
-        containerRef.current.style.width = `${totalWidth}px`;
-      }
-    };
+    setContainerWidth(totalWidth);
+    setViewportWidth(vw);
+    setViewportHeight(vh);
 
-    updateSizes();
-    window.addEventListener("resize", updateSizes);
-    return () => window.removeEventListener("resize", updateSizes);
-  }, [isMobile]);
+    const bufferZone = vh * 0.8;
+    const transitionZone = vh * 1.2;
+    const verticalSections = 4.7;
 
+    const total =
+      horizontalScrollDistance +
+      bufferZone +
+      transitionZone +
+      vh * verticalSections;
+
+    // HARD FLOOR — never allow 0
+    setSpacerHeight(Math.max(vh, total));
+
+    if (containerRef.current) {
+      containerRef.current.style.width = `${totalWidth}px`;
+    }
+  };
+
+  updateSizes();
+  window.addEventListener("resize", updateSizes);
+  return () => window.removeEventListener("resize", updateSizes);
+
+}, [hydrated, isMobile]); // ✅ STATIC, ALWAYS SAME SIZE
   // send email api
   const API_URL = "/api/send-email";
 
@@ -584,13 +601,13 @@ useEffect(() => {
 
   // Hide horizontal overflow (only for desktop)
   useEffect(() => {
-    if (isMobile) return;
+      if (!hydrated || isMobile) return;
     const prev = document.body.style.overflowX;
     document.body.style.overflowX = "hidden";
     return () => {
       document.body.style.overflowX = prev;
     };
-  }, [isMobile]);
+  }, [hydrated, isMobile]);
 
 
 
@@ -621,7 +638,7 @@ useEffect(() => {
 
   // Scroll handler (only for desktop) — kept your logic intact
   useEffect(() => {
-    if (isMobile) return;
+      if (!hydrated || isMobile) return;
 
     const onScroll = () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
@@ -717,6 +734,10 @@ useEffect(() => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, [viewportWidth, viewportHeight, isMobile]);
+
+  if (!hydrated) {
+  return null;
+}
   // Mobile Layout
   if (isMobile) {
   return (
